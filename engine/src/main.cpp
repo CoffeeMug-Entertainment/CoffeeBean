@@ -1,7 +1,8 @@
 #include <iostream>
+#include "App.h"
 
-int main(int argc, char* argv[])
-{
-	std::cout << "Hello, World!\n";
+int main(int argc, char* argv[]) {
+	CBE::App game;
+	game.Loop();
 	return 0;
 }
