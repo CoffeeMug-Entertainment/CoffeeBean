@@ -16,6 +16,7 @@ namespace CBE
 		private:
 			//TODO(Fix): Smart pointers - unique_ptr
 			SDL_Window* m_window;
+			SDL_GLContext m_context;
 			SDL_Event m_event;
 
 			bool m_running;
