@@ -1,5 +1,6 @@
 #include "App.h"
 #include "glad/glad.h"
+#include "spdlog/spdlog.h"
 
 #include <iostream>
 
@@ -13,7 +14,7 @@ namespace CBE
 		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 		if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-  			std::cout << "Failed to init SDL!\n";
+			spdlog::error("Failed to init SDL!\n\t{}", SDL_GetError());
 			exit(-1);
   		}
 
@@ -25,7 +26,7 @@ namespace CBE
 									SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
 
 		if (m_window == nullptr) {
-  			std::cout << "Failed to make window!\n";
+			spdlog::error("Failed to make window!\n\t{}", SDL_GetError());
 			exit(-2);
   		}
 
@@ -33,14 +34,13 @@ namespace CBE
 		
 		if(m_context == 0)
 		{
-			std::cout << "Failed to make OpenGL Context!\n";
-			std::cout << SDL_GetError() << std::endl;
+			spdlog::error("Failed to make OpenGL context!\n\t{}", SDL_GetError());
 			exit(-3);
 		}
 
 		if(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
 		{
-			std::cout << "Failed to initialise GLAD!\n";
+			spdlog::error("Failed to initialise GLAD!\n");
 			exit(-4);
 		}
 
