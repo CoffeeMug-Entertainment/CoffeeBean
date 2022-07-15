@@ -12,7 +12,9 @@ add_subdirectory(${SDL_DIR})
 set(GLAD_DIR engine/thirdparty/glad)
 set(GLAD_INC_DIR ${GLAD_DIR}/include)
 file(GLOB GLAD_SRC ${GLAD_DIR}/src/glad.c)
+IF(UNIX)
 set(GLAD_LDFLAGS GL)
+ENDIF()
 
 # spdlog
 set(SPDLOG_DIR engine/thirdparty/spdlog)
@@ -24,14 +26,19 @@ file(GLOB CBE_SRC
 	${CBE_SRC_DIR}/App.cpp 
 	${CBE_SRC_DIR}/main.cpp)
 
+IF(WIN32)
+add_definitions("-Wall -pedantic")
+ELSEIF(UNIX)
 add_definitions("-Wall -Wextra -pedantic")
+ENDIF()
 add_executable(${PROJECT_NAME} ${CBE_SRC} ${GLAD_SRC})
 
+target_include_directories(${PROJECT_NAME} PUBLIC ${SPDLOG_INC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SDL_INC_DIR})
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${GLAD_INC_DIR})
 
 IF(WIN32)
-	#TODO(Fix): Yep
+	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2-static SDL2::SDL2main)
 ELSEIF(UNIX)
 	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2 ${GLAD_LDFLAGS} X11 pthread Xrandr Xi dl)
 ENDIF()
