@@ -14,6 +14,11 @@ set(GLAD_INC_DIR ${GLAD_DIR}/include)
 file(GLOB GLAD_SRC ${GLAD_DIR}/src/glad.c)
 set(GLAD_LDFLAGS GL)
 
+# spdlog
+set(SPDLOG_DIR engine/thirdparty/spdlog)
+set(SPDLOG_INC_DIR ${SPDLOG_DIR}/include)
+add_subdirectory(${SPDLOG_DIR})
+
 set(CBE_SRC_DIR engine/src)
 file(GLOB CBE_SRC 
 	${CBE_SRC_DIR}/App.cpp 
@@ -28,7 +33,7 @@ target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${GLAD_INC_DIR})
 IF(WIN32)
 	#TODO(Fix): Yep
 ELSEIF(UNIX)
-	set(CBE_LDFLAGS SDL2::SDL2 ${GLAD_LDFLAGS} X11 pthread Xrandr Xi dl)
+	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2 ${GLAD_LDFLAGS} X11 pthread Xrandr Xi dl)
 ENDIF()
 
 target_link_libraries(${PROJECT_NAME} ${CBE_LDFLAGS})
