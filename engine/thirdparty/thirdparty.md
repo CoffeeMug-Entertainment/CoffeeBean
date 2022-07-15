@@ -11,3 +11,9 @@
 * Version: ???
 * License: ???
 * Acquired from (generated): https://glad.dav1d.de
+
+## spdlog
+
+* Version: 1.10.0
+* License: MIT
+* Acquired from: https://github.com/gabime/spdlog/releases/tag/v1.10.0
