@@ -21,6 +21,11 @@ set(SPDLOG_DIR engine/thirdparty/spdlog)
 set(SPDLOG_INC_DIR ${SPDLOG_DIR}/include)
 add_subdirectory(${SPDLOG_DIR})
 
+# glm
+set(GLM_DIR engine/thirdparty/glm)
+set(GLM_INC_DIR ${GLM_DIR})
+add_subdirectory(${GLM_DIR})
+
 set(CBE_SRC_DIR engine/src)
 file(GLOB CBE_SRC 
 	${CBE_SRC_DIR}/App.cpp 
