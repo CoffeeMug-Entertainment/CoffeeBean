@@ -40,7 +40,7 @@ target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${GLAD_INC_DIR})
 IF(WIN32)
 	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2-static SDL2::SDL2main)
 ELSEIF(UNIX)
-	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2 ${GLAD_LDFLAGS} X11 pthread Xrandr Xi dl)
+	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2 m pthread dl -static-libgcc -static-libstdc++)
 ENDIF()
 
 target_link_libraries(${PROJECT_NAME} ${CBE_LDFLAGS})
