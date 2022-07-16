@@ -6,8 +6,18 @@
 
 namespace CBE
 {
+	App* App::s_instance = nullptr;
+
+
 	App::App() 
 	{
+		if (s_instance) {
+			spdlog::error("App instance already exits!");
+			return;
+  		}
+
+		s_instance = this;
+
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);

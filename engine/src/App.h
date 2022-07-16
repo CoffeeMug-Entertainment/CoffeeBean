@@ -13,7 +13,10 @@ namespace CBE
 			App();
 			~App();
 			int Loop();
+			static App& Instance() {return *s_instance;}
 		private:
+
+			static App* s_instance;
 			//TODO(Fix): Smart pointers - unique_ptr
 			SDL_Window* m_window;
 			SDL_GLContext m_context;
