@@ -17,3 +17,9 @@
 * Version: 1.10.0
 * License: MIT
 * Acquired from: https://github.com/gabime/spdlog/releases/tag/v1.10.0
+
+## glm
+
+* Version 0.9.9.8
+* License: The Happy Bunny License
+* Acquired from: https://github.com/g-truc/glm/releases/tag/0.9.9.8
