@@ -40,38 +40,33 @@ namespace CBE
 			exit(-2);
   		}
 
-		m_context = SDL_GL_CreateContext(m_window);
-		
-		if(m_context == 0)
-		{
-			spdlog::error("Failed to make OpenGL context!\n\t{}", SDL_GetError());
-			exit(-3);
-		}
-
-		if(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
-		{
-			spdlog::error("Failed to initialise GLAD!\n");
-			exit(-4);
-		}
+		m_renderer = std::unique_ptr<Renderer>(new Renderer(m_window));
 
 		m_running = true;
 	}
 
 	App::~App() 
 	{
-		SDL_GL_DeleteContext(m_context);
 		SDL_DestroyWindow(m_window);
 		SDL_Quit();
+	}
+
+	void App::Render()
+	{
+		m_renderer->Begin();
+		// TODO(fix) Draw objects
+		m_renderer->End();
+		SDL_GL_SwapWindow(m_window);
 	}
 	
 	int App::Loop()
 	{
 		glClearColor(0.75f, 1.0f, 0.93f, 1.0f); //#C0FFEE
+		m_renderer->SetClearColor({0.75f, 1.0f, 0.93f, 1.0f});
 		while(m_running)
 		{
 			ProcessEvents();
-			glClear(GL_COLOR_BUFFER_BIT);
-			SDL_GL_SwapWindow(m_window);
+			Render();	
 		}
 
 		return 0;
