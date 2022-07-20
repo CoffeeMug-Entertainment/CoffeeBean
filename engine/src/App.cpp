@@ -5,36 +5,14 @@
 #include "Renderer/Shader.h"
 #include "Renderer/DefaultShaders.h"
 #include "Renderer/Buffers.h"
+#include "Renderer/Model.h"
 
 #include <iostream>
 
 namespace CBE
 {
-
-	//TEMP(fix): just to have something in the world
-	struct triangle
-	{
-		glm::vec3 pos;
-		glm::vec3 first;
-		glm::vec3 second;
-		glm::vec3 third;
-
-		ShaderProgram* shaderProgram;
-		VBO vbo;
-		VAO vao;
-		EBO ebo;
-
-		float triangle_verts[9] =
-		{
-			-0.5f, -0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f,
-			0.0f, 0.5f, 0.0f
-		};
-
-		unsigned int triangle_indices[3] = {0, 1, 2};
-	};
-
-	triangle g_triangle;
+	//TEMP(Fix): Just to draw something in the world
+	Model g_triangle;
 
 	App* App::s_instance = nullptr;
 
@@ -71,23 +49,18 @@ namespace CBE
 		m_running = true;
 
 		//TEMP(fix): Just to mess around with OpenGL
-		g_triangle.pos = {0.0f, 0.0f, 0.0f};
-		g_triangle.first = {-0.5f, -0.5f, 0.0f};
-		g_triangle.second = {0.5f, -0.5f, 0.0f};
-		g_triangle.third = {0.0f, 0.5f, 0.0f};
+		Mesh temp;
+		temp.vertices.emplace_back(Vertex{glm::vec3{-0.5f, -0.5f, 0.0f}});
+		temp.vertices.emplace_back(Vertex{glm::vec3{0.5f, -0.5f, 0.0f}});
+		temp.vertices.emplace_back(Vertex{glm::vec3{0.0f, 0.5f, 0.0f}});
 
+		temp.indices.emplace_back(0);
+		temp.indices.emplace_back(1);
+		temp.indices.emplace_back(2);
+
+		temp.Setup();
 		
-		g_triangle.vao.Generate();
-		g_triangle.vao.Bind();
-		
-		g_triangle.vbo.Generate(g_triangle.triangle_verts, sizeof(g_triangle.triangle_verts));
-		g_triangle.ebo.Generate(g_triangle.triangle_indices, sizeof(g_triangle.triangle_indices));
-
-		g_triangle.vao.LinkVBO(&g_triangle.vbo, 0);
-
-		g_triangle.vao.Unbind();
-		g_triangle.vbo.Unbind();
-		g_triangle.ebo.Unbind();
+		g_triangle.meshes.emplace_back(temp);
 
 		g_triangle.shaderProgram = new ShaderProgram();
 
@@ -113,13 +86,8 @@ namespace CBE
 	{
 		m_renderer->Begin();
 		
-		g_triangle.shaderProgram->Use();
-
-		g_triangle.vao.Bind();
-		//m_renderer->DrawTri();
-		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-		g_triangle.vao.Unbind();
-		glUseProgram(0);
+		//TODO(fix): per model
+		g_triangle.Draw();
 
 		m_renderer->End();
 		SDL_GL_SwapWindow(m_window);

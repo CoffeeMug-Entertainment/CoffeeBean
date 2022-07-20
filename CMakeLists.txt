@@ -31,6 +31,8 @@ file(GLOB CBE_SRC
 	${CBE_SRC_DIR}/App.cpp 
 	${CBE_SRC_DIR}/Renderer/Shader.cpp
 	${CBE_SRC_DIR}/Renderer/Buffers.cpp
+	${CBE_SRC_DIR}/Renderer/Mesh.cpp
+	${CBE_SRC_DIR}/Renderer/Model.cpp
 	${CBE_SRC_DIR}/Renderer/Renderer.cpp 
 	${CBE_SRC_DIR}/main.cpp)
 

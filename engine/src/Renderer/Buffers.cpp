@@ -3,7 +3,7 @@
 
 namespace CBE
 {
-	void VBO::Generate(GLfloat* vertices, GLsizeiptr size)
+	void VBO::Generate(const GLvoid* vertices, GLsizeiptr size)
 	{
 		glGenBuffers(1, &id);
 		glBindBuffer(GL_ARRAY_BUFFER, id);
@@ -56,7 +56,7 @@ namespace CBE
 		vbo->Unbind();
 	}
 
-	void EBO::Generate(GLuint* indices, GLsizeiptr size)
+	void EBO::Generate(const GLvoid* indices, GLsizeiptr size)
 	{
 		glGenBuffers(1, &id);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);

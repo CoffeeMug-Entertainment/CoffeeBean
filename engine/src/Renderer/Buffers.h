@@ -9,7 +9,7 @@ namespace CBE
 	{
 		GLuint id;
 
-		void Generate(GLfloat* vertices, GLsizeiptr size);
+		void Generate(const GLvoid* vertices, GLsizeiptr size);
 		void Delete();
 		void Bind();
 		void Unbind();
@@ -32,7 +32,7 @@ namespace CBE
 	{
 		GLuint id;
 
-		void Generate(GLuint* indices, GLsizeiptr size);
+		void Generate(const GLvoid* indices, GLsizeiptr size);
 		void Delete();
 		void Bind();
 		void Unbind();

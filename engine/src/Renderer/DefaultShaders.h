@@ -13,21 +13,21 @@ namespace CBE
 
 	void main()
 	{
-		gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-		vertColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		gl_Position = vec4(aPos, 1.0);
+		vertColor = vec4(1.0, 1.0, 1.0, 1.0);
 	}
 	)glsl";
 
 	const std::string DEFAULT_FRAG_SHADER_SRC = R"glsl(
 	#version 330 core
 
-	in vec4 vertexColor;
+	in vec4 vertColor;
 	out vec4 FragColor;
 
 	void main()
 	{
-		FragColor = vertexColor;
-		FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+		FragColor = vertColor;
+		//FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 	}
 	)glsl";
 }
