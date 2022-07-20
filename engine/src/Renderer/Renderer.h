@@ -19,7 +19,7 @@ namespace CBE
 		void End();
 
 		//TEMP(Fix): Just to have something drawn
-		void DrawTri(glm::vec3& position, std::array<float, 9>& verices);
+		void DrawTri();
 
 		void SetClearColor(glm::vec4&& newColor);
 

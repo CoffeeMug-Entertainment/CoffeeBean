@@ -6,6 +6,11 @@ namespace CBE
 {
 	Renderer::Renderer(SDL_Window* window)
 	{
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+		//SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
 		m_context = SDL_GL_CreateContext(window);
 
 		
@@ -15,11 +20,18 @@ namespace CBE
 			exit(-3);
 		}
 
+		SDL_GL_SetSwapInterval(1);
+
 		if(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
 		{
 			spdlog::error("Failed to initialise GLAD!\n");
 			exit(-4);
 		}
+		glViewport(0, 0, 800, 600);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+
+		spdlog::info("\nOpenGL Info:\n\tVendor: {}\n\tRenderer: {}\n\tVersion: {}", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
 	}
 	
 	Renderer::~Renderer()
@@ -38,9 +50,9 @@ namespace CBE
 
 	}
 
-	void Renderer::DrawTri(glm::vec3& position, std::array<float, 9>& vertices)
+	void Renderer::DrawTri()
 	{
-		
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
 
 	void Renderer::SetClearColor(glm::vec4&& newColor)
