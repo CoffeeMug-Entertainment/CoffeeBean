@@ -1,5 +1,8 @@
 #include "Buffers.h"
 #include "glad/glad.h"
+#include "Mesh.h"
+
+#include <cstddef>
 
 namespace CBE
 {
@@ -50,8 +53,11 @@ namespace CBE
 		vbo = newVBO;
 		vbo->Bind();
 
-		glVertexAttribPointer(layout, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glVertexAttribPointer(layout, 3, GL_FLOAT, GL_FALSE,  sizeof(Vertex), (void*)0);
 		glEnableVertexAttribArray(layout);
+
+		glVertexAttribPointer(layout + 1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, color)));
+		glEnableVertexAttribArray(layout + 1);
 
 		vbo->Unbind();
 	}
