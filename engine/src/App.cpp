@@ -53,9 +53,9 @@ namespace CBE
 		//TEMP(fix): Just to mess around with OpenGL
 
 		Mesh temp;
-		temp.EmplaceVertex(glm::vec3{-0.5f, 0.5f, 0.0f});
-		temp.EmplaceVertex(glm::vec3{-0.5f, -0.5f, 0.0f});
-		temp.EmplaceVertex(glm::vec3{0.5f, -0.5f, 0.0f});
+		temp.EmplaceVertex(glm::vec3{-0.5f, 0.5f, 0.0f}, glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
+		temp.EmplaceVertex(glm::vec3{-0.5f, -0.5f, 0.0f}, glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
+		temp.EmplaceVertex(glm::vec3{0.5f, -0.5f, 0.0f}, glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
 		temp.EmplaceVertex(glm::vec3{0.5f, 0.5f, 0.0f});
 
 		temp.indices.emplace_back(0);
