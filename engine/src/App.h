@@ -17,6 +17,7 @@ namespace CBE
 			void Render();
 			int Loop();
 			static App& Instance() {return *s_instance;}
+			unsigned long long ticks;
 		private:
 
 			static App* s_instance;

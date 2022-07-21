@@ -12,8 +12,9 @@
 namespace CBE
 {
 	//TEMP(Fix): Just to draw something in the world
-	Model g_triangle;
-
+	//Model g_triangle;
+	Model g_rect;
+	
 	App* App::s_instance = nullptr;
 
 
@@ -47,22 +48,27 @@ namespace CBE
 		m_renderer = std::unique_ptr<Renderer>(new Renderer(m_window));
 
 		m_running = true;
+		ticks = 0;
 
 		//TEMP(fix): Just to mess around with OpenGL
+
 		Mesh temp;
-		temp.vertices.emplace_back(Vertex{glm::vec3{-0.5f, -0.5f, 0.0f}});
-		temp.vertices.emplace_back(Vertex{glm::vec3{0.5f, -0.5f, 0.0f}});
-		temp.vertices.emplace_back(Vertex{glm::vec3{0.0f, 0.5f, 0.0f}});
+		temp.EmplaceVertex(glm::vec3{-0.5f, 0.5f, 0.0f});
+		temp.EmplaceVertex(glm::vec3{-0.5f, -0.5f, 0.0f});
+		temp.EmplaceVertex(glm::vec3{0.5f, -0.5f, 0.0f});
+		temp.EmplaceVertex(glm::vec3{0.5f, 0.5f, 0.0f});
 
 		temp.indices.emplace_back(0);
 		temp.indices.emplace_back(1);
+		temp.indices.emplace_back(3);
+		temp.indices.emplace_back(1);
 		temp.indices.emplace_back(2);
+		temp.indices.emplace_back(3);
 
 		temp.Setup();
-		
-		g_triangle.meshes.emplace_back(temp);
 
-		g_triangle.shaderProgram = new ShaderProgram();
+		g_rect.meshes.emplace_back(temp);
+		g_rect.shaderProgram = new ShaderProgram();
 
 		Shader* vShader = new Shader(Shader::VERT, DEFAULT_VERT_SHADER_SRC, "DEFAULT_VERT_SHADER_SRC");
 		Shader* fShader = new Shader(Shader::FRAG, DEFAULT_FRAG_SHADER_SRC, "DEFAULT_FRAG_SHADER_SRC");
@@ -70,9 +76,9 @@ namespace CBE
 		vShader->Compile();
 		fShader->Compile();
 
-		g_triangle.shaderProgram->AttachVertShader(vShader);
-		g_triangle.shaderProgram->AttachFragShader(fShader);
-		g_triangle.shaderProgram->Link();
+		g_rect.shaderProgram->AttachVertShader(vShader);
+		g_rect.shaderProgram->AttachFragShader(fShader);
+		g_rect.shaderProgram->Link();
 
 	}
 
@@ -87,7 +93,7 @@ namespace CBE
 		m_renderer->Begin();
 		
 		//TODO(fix): per model
-		g_triangle.Draw();
+		g_rect.Draw();
 
 		m_renderer->End();
 		SDL_GL_SwapWindow(m_window);
@@ -98,6 +104,7 @@ namespace CBE
 		m_renderer->SetClearColor({0.75f, 1.0f, 0.93f, 1.0f});
 		while(m_running)
 		{
+			ticks = SDL_GetTicks64();
 			ProcessEvents();
 			Render();	
 		}
