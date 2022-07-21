@@ -15,4 +15,9 @@ namespace CBE
 		vao.Unbind();
 		ebo.Unbind();
 	}
+
+	void Mesh::EmplaceVertex(glm::vec3 position, glm::vec4 color)
+	{
+		vertices.emplace_back(Vertex{position, color});
+	}
 }
