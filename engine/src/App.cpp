@@ -53,6 +53,10 @@ namespace CBE
 		//TEMP(fix): Just to mess around with OpenGL
 
 		Mesh temp;
+
+#define DRAW_HEX
+
+#if defined(DRAW_RECT)
 		temp.EmplaceVertex(glm::vec3{-0.5f, 0.5f, 0.0f}, glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
 		temp.EmplaceVertex(glm::vec3{-0.5f, -0.5f, 0.0f}, glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
 		temp.EmplaceVertex(glm::vec3{0.5f, -0.5f, 0.0f}, glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
@@ -64,7 +68,28 @@ namespace CBE
 		temp.indices.emplace_back(1);
 		temp.indices.emplace_back(2);
 		temp.indices.emplace_back(3);
+#endif
 
+#if !defined(DRAW_RECT) && defined(DRAW_HEX)
+		temp.EmplaceVertex();
+		temp.EmplaceVertex(glm::vec3{-0.5, 0.0, 0.0}, glm::vec4{1.0f, 0.0f, 0.0f, 1.0f}); //left
+		temp.EmplaceVertex(glm::vec3{-0.25, -0.5, 0.0}, glm::vec4{0.0f, 1.0f, 0.0f, 1.0f}); //bottom left
+		temp.EmplaceVertex(glm::vec3{0.25, -0.5, 0.0}, glm::vec4{0.0f, 0.0f, 1.0f, 1.0f}); // bottom right
+		temp.EmplaceVertex(glm::vec3{0.5, 0.0, 0.0}, glm::vec4{1.0f, 0.0f, 0.0f, 1.0f}); //right
+		temp.EmplaceVertex(glm::vec3{0.25, 0.5, 0.0}, glm::vec4{0.0f, 1.0f, 0.0f, 1.0f}); //top right
+		temp.EmplaceVertex(glm::vec3{-0.25, 0.5, 0.0}, glm::vec4{0.0f, 0.0f, 1.0f, 1.0f}); //top left
+
+		for(int i = 0; i <= 5; ++i)
+		{
+			temp.indices.emplace_back(0);
+			temp.indices.emplace_back(i);
+			temp.indices.emplace_back(i + 1);
+		}
+
+			temp.indices.emplace_back(0);
+			temp.indices.emplace_back(6);
+			temp.indices.emplace_back(1);
+#endif
 		temp.Setup();
 
 		g_rect.meshes.emplace_back(temp);
