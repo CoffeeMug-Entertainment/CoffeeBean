@@ -5,6 +5,8 @@
 #include "Renderer/Shader.h"
 #include "Renderer/DefaultShaders.h"
 #include "Renderer/Buffers.h"
+#include "Entities/Components.h"
+#include "Entities/Entity.h"
 #include "Renderer/Model.h"
 
 #include <iostream>
@@ -14,6 +16,7 @@ namespace CBE
 	//TEMP(Fix): Just to draw something in the world
 	//Model g_triangle;
 	Model g_rect;
+	Entity g_rectObj;
 	
 	App* App::s_instance = nullptr;
 
@@ -105,6 +108,8 @@ namespace CBE
 		g_rect.shaderProgram->AttachFragShader(fShader);
 		g_rect.shaderProgram->Link();
 
+		g_rectObj.AddTransform();
+		g_rectObj.AddModel(g_rect);
 	}
 
 	App::~App() 
@@ -113,12 +118,36 @@ namespace CBE
 		SDL_Quit();
 	}
 
+	//TEMP(Fix)
+	void DrawSystem(Entity& ent)
+	{
+		TransformComp* trans = ent.transform;
+		ModelComp* modComp = ent.modelComp;
+
+		modComp->model.shaderProgram->Use();
+		
+		modComp->model.shaderProgram->Uniform3f("pos_offset", trans->position.x, trans->position.y, trans->position.z);
+		modComp->model.shaderProgram->Uniform1i("ticks", App::Instance().ticks);
+
+		for (Mesh& mesh : modComp->model.meshes) 
+		{
+			mesh.vao.Bind();
+			glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);
+			mesh.vao.Unbind();
+		}
+
+		glUseProgram(0);
+		
+	}
+
 	void App::Render()
 	{
 		m_renderer->Begin();
 		
 		//TODO(fix): per model
-		g_rect.Draw();
+		//g_rect.Draw();
+		//g_rectObj.modelComp->model.Draw();
+		DrawSystem(g_rectObj);
 
 		m_renderer->End();
 		SDL_GL_SwapWindow(m_window);
