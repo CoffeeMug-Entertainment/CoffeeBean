@@ -27,7 +27,10 @@ namespace CBE
 			spdlog::error("Failed to initialise GLAD!\n");
 			exit(-4);
 		}
-		glViewport(0, 0, 800, 600);
+		
+		int w, h;
+		SDL_GL_GetDrawableSize(window, &w, &h);
+		glViewport(0, 0, w, h);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 
