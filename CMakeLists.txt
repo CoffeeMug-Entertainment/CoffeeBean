@@ -43,6 +43,7 @@ add_definitions("-Wall -Wextra -pedantic")
 ENDIF()
 add_executable(${PROJECT_NAME} ${CBE_SRC} ${GLAD_SRC})
 
+target_include_directories(${PROJECT_NAME} PUBLIC ${CBE_SRC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SPDLOG_INC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SDL_INC_DIR})
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${GLAD_INC_DIR})
