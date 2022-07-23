@@ -7,6 +7,7 @@ namespace CBE
 	void Entity::AddTransform()
 	{
 		transform = new TransformComp();
+		transform->ToDefault();
 	}
 
 	void Entity::AddModel(Model& newModel)
