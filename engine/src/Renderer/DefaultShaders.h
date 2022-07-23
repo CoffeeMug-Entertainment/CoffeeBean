@@ -12,12 +12,12 @@ namespace CBE
 	layout (location = 1) in vec4 aColor;
 	out vec4 vertColor;
 
-	uniform vec3 pos_offset;
+	uniform mat4 transform;
 	uniform int ticks;
 
 	void main()
 	{
-		gl_Position = vec4(aPos, 1.0);
+		gl_Position = transform * vec4(aPos, 1.0);
 		vertColor = aColor;
 	}
 	)glsl";
@@ -28,7 +28,7 @@ namespace CBE
 	in vec4 vertColor;
 	out vec4 FragColor;
 
-	uniform vec3 pos_offset;
+	uniform mat4 transform;
 	uniform int ticks;
 
 	void main()

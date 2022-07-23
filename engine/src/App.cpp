@@ -9,6 +9,9 @@
 #include "Entities/Entity.h"
 #include "Renderer/Model.h"
 
+
+#include "glm/gtc/type_ptr.hpp"
+
 #include <iostream>
 
 namespace CBE
@@ -126,7 +129,7 @@ namespace CBE
 
 		modComp->model.shaderProgram->Use();
 		
-		modComp->model.shaderProgram->Uniform3f("pos_offset", trans->position.x, trans->position.y, trans->position.z);
+		modComp->model.shaderProgram->UniformMatrix4fv("transform", 1, GL_FALSE, ::glm::value_ptr(trans->Matrix()));
 		modComp->model.shaderProgram->Uniform1i("ticks", App::Instance().ticks);
 
 		for (Mesh& mesh : modComp->model.meshes) 

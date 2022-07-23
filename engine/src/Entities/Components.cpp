@@ -4,7 +4,7 @@
 
 namespace CBE
 {
-	glm::mat4 TransformComp::Identity()
+	glm::mat4 TransformComp::Matrix()
 	{
 		glm::mat4 scaleMatrix = glm::scale(scale);
 		glm::mat4 rotMatrix = glm::eulerAngleYXZ(rotation.y, rotation.x, rotation.z);

@@ -14,7 +14,7 @@ namespace CBE
 		glm::vec3 rotation;
 		glm::vec3 scale;
 
-		glm::mat4 Identity();
+		glm::mat4 Matrix();
 
 		void ToDefault();
 	};
