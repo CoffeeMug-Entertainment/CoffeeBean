@@ -6,12 +6,13 @@ namespace CBE
 {
 	glm::mat4 TransformComp::Matrix()
 	{
-		glm::mat4 scaleMatrix = glm::scale(scale);
-		glm::mat4 rotMatrix = glm::eulerAngleYXZ(rotation.y, rotation.x, rotation.z);
-		glm::mat4 transMatrix = glm::translate(position);
-
-		glm::mat4 identity = transMatrix + rotMatrix + scaleMatrix;
-		return identity;
+		glm::mat4 transMatrix = glm::mat4(1.0f);
+		transMatrix = glm::translate(transMatrix, position);
+		transMatrix = glm::rotate(transMatrix, glm::radians(rotation.x), glm::vec3{1.0f, 0.0f, 0.0f});
+		transMatrix = glm::rotate(transMatrix, glm::radians(rotation.y), glm::vec3{0.0f, 1.0f, 0.0f});
+		transMatrix = glm::rotate(transMatrix, glm::radians(rotation.z), glm::vec3{0.0f, 0.0f, 1.0f});
+		transMatrix = glm::scale(transMatrix, scale);
+		return transMatrix;
 	}
 
 	void TransformComp::ToDefault()
