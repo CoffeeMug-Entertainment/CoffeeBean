@@ -18,6 +18,9 @@ namespace CBE
 			int Loop();
 			static App& Instance() {return *s_instance;}
 			unsigned long long ticks;
+			unsigned long long oldTicks;
+			//unsigned long long deltaTicks;
+			float deltaTime;
 			std::unique_ptr<Renderer> m_renderer;
 		private:
 

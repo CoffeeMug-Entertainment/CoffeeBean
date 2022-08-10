@@ -164,7 +164,10 @@ namespace CBE
 		m_renderer->SetClearColor({0.75f, 1.0f, 0.93f, 1.0f});
 		while(m_running)
 		{
+			oldTicks = ticks;
 			ticks = SDL_GetTicks64();
+			//deltaTicks = ticks - oldTicks;
+			deltaTime = (ticks - oldTicks) / 1000.0f;
 			ProcessEvents();
 			Render();	
 		}
