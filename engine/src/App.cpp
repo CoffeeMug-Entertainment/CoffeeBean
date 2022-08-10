@@ -52,7 +52,7 @@ namespace CBE
   		}
 
 		m_renderer = std::unique_ptr<Renderer>(new Renderer(m_window));
-
+		m_renderer->camera.ToDefault();
 		m_running = true;
 		ticks = 0;
 
@@ -130,6 +130,8 @@ namespace CBE
 		modComp->model.shaderProgram->Use();
 		
 		modComp->model.shaderProgram->UniformMatrix4fv("transform", 1, GL_FALSE, ::glm::value_ptr(trans->Matrix()));
+		modComp->model.shaderProgram->UniformMatrix4fv("projection", 1, GL_FALSE, ::glm::value_ptr(App::Instance().m_renderer->camera.ProjectionMatrix()));
+		modComp->model.shaderProgram->UniformMatrix4fv("view", 1, GL_FALSE, ::glm::value_ptr(App::Instance().m_renderer->camera.ViewMatrix()));
 		modComp->model.shaderProgram->Uniform1i("ticks", App::Instance().ticks);
 
 		for (Mesh& mesh : modComp->model.meshes) 
@@ -151,6 +153,7 @@ namespace CBE
 		//g_rect.Draw();
 		//g_rectObj.modelComp->model.Draw();
 		DrawSystem(g_rectObj);
+		g_rectObj.transform->rotation.z += 1.0f;
 
 		m_renderer->End();
 		SDL_GL_SwapWindow(m_window);
@@ -180,6 +183,18 @@ namespace CBE
 				break;
 			case SDL_KEYDOWN:
 				if(m_event.key.keysym.sym == SDLK_ESCAPE) {m_running = false;}
+//TEMP(fhomolka): just a neat place to move around
+#if 1
+				if(m_event.key.keysym.sym == SDLK_a) {m_renderer->camera.position.x -= 1.0f;}
+				if(m_event.key.keysym.sym == SDLK_d) {m_renderer->camera.position.x += 1.0f;}
+				if(m_event.key.keysym.sym == SDLK_w) {m_renderer->camera.position.y += 1.0f;}
+				if(m_event.key.keysym.sym == SDLK_s) {m_renderer->camera.position.y -= 1.0f;}
+
+				if(m_event.key.keysym.sym == SDLK_KP_8) {m_renderer->camera.target.y += 1.0f;}
+				if(m_event.key.keysym.sym == SDLK_KP_2) {m_renderer->camera.target.y -= 1.0f;}
+				if(m_event.key.keysym.sym == SDLK_KP_6) {m_renderer->camera.target.x += 1.0f;}
+				if(m_event.key.keysym.sym == SDLK_KP_4) {m_renderer->camera.target.x -= 1.0f;}
+#endif
 				break;
 			default:
 				break;
