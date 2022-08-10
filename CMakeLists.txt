@@ -28,14 +28,15 @@ add_subdirectory(${GLM_DIR})
 
 set(CBE_SRC_DIR engine/src)
 file(GLOB CBE_SRC 
-	${CBE_SRC_DIR}/App.cpp 
 	${CBE_SRC_DIR}/Renderer/Shader.cpp
 	${CBE_SRC_DIR}/Renderer/Buffers.cpp
 	${CBE_SRC_DIR}/Renderer/Mesh.cpp
 	${CBE_SRC_DIR}/Renderer/Model.cpp
+	${CBE_SRC_DIR}/Renderer/Camera.cpp
 	${CBE_SRC_DIR}/Renderer/Renderer.cpp
 	${CBE_SRC_DIR}/Entities/Entity.cpp
 	${CBE_SRC_DIR}/Entities/Components.cpp
+	${CBE_SRC_DIR}/App.cpp 
 	${CBE_SRC_DIR}/main.cpp)
 
 IF(WIN32)
