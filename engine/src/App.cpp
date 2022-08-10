@@ -185,16 +185,34 @@ namespace CBE
 				if(m_event.key.keysym.sym == SDLK_ESCAPE) {m_running = false;}
 //TEMP(fhomolka): just a neat place to move around
 #if 1
-				if(m_event.key.keysym.sym == SDLK_a) {m_renderer->camera.position.x -= 1.0f;}
-				if(m_event.key.keysym.sym == SDLK_d) {m_renderer->camera.position.x += 1.0f;}
-				if(m_event.key.keysym.sym == SDLK_w) {m_renderer->camera.position.y += 1.0f;}
-				if(m_event.key.keysym.sym == SDLK_s) {m_renderer->camera.position.y -= 1.0f;}
+				if(m_event.key.keysym.sym == SDLK_a) 
+				{
+					m_renderer->camera.position.x -= 1.0f;
+					m_renderer->camera.target.x -= 1.0f;
+				}
+				if(m_event.key.keysym.sym == SDLK_d) 
+				{
+					m_renderer->camera.position.x += 1.0f;
+					m_renderer->camera.target.x += 1.0f;
+				}
+				if(m_event.key.keysym.sym == SDLK_w) 
+				{
+					m_renderer->camera.position.y += 1.0f;
+					m_renderer->camera.target.y += 1.0f;
+				}
+				if(m_event.key.keysym.sym == SDLK_s) 
+				{
+					m_renderer->camera.position.y -= 1.0f;
+					m_renderer->camera.target.y -= 1.0f;
+				}
 
 				if(m_event.key.keysym.sym == SDLK_KP_8) {m_renderer->camera.target.y += 1.0f;}
 				if(m_event.key.keysym.sym == SDLK_KP_2) {m_renderer->camera.target.y -= 1.0f;}
 				if(m_event.key.keysym.sym == SDLK_KP_6) {m_renderer->camera.target.x += 1.0f;}
 				if(m_event.key.keysym.sym == SDLK_KP_4) {m_renderer->camera.target.x -= 1.0f;}
 #endif
+				break;
+			case SDL_MOUSEMOTION:
 				break;
 			default:
 				break;
