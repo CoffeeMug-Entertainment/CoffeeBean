@@ -33,6 +33,7 @@ set(STB_INC_DIR ${STB_DIR})
 set(CBE_SRC_DIR engine/src)
 file(GLOB CBE_SRC 
 	${CBE_SRC_DIR}/header_impl.cpp
+	${CBE_SRC_DIR}/Renderer/Texture.cpp
 	${CBE_SRC_DIR}/Renderer/Shader.cpp
 	${CBE_SRC_DIR}/Renderer/Buffers.cpp
 	${CBE_SRC_DIR}/Renderer/Mesh.cpp
