@@ -20,9 +20,6 @@ namespace CBE
 		void Begin();
 		void End();
 
-		//TEMP(Fix): Just to have something drawn
-		void DrawTri();
-
 		void SetClearColor(glm::vec4&& newColor);
 		Camera camera;
 	private:

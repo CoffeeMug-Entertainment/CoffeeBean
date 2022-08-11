@@ -53,11 +53,6 @@ namespace CBE
 
 	}
 
-	void Renderer::DrawTri()
-	{
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-	}
-
 	void Renderer::SetClearColor(glm::vec4&& newColor)
 	{
 		m_clearColor = newColor;
