@@ -26,8 +26,13 @@ set(GLM_DIR engine/thirdparty/glm)
 set(GLM_INC_DIR ${GLM_DIR})
 add_subdirectory(${GLM_DIR})
 
+#stb
+set(STB_DIR engine/thirdparty/stb)
+set(STB_INC_DIR ${STB_DIR})
+
 set(CBE_SRC_DIR engine/src)
 file(GLOB CBE_SRC 
+	${CBE_SRC_DIR}/header_impl.cpp
 	${CBE_SRC_DIR}/Renderer/Shader.cpp
 	${CBE_SRC_DIR}/Renderer/Buffers.cpp
 	${CBE_SRC_DIR}/Renderer/Mesh.cpp
@@ -51,6 +56,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${SPDLOG_INC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SDL_INC_DIR})
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${GLAD_INC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLM_INC_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${STB_INC_DIR})
 
 IF(WIN32)
 	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2-static SDL2::SDL2main)
