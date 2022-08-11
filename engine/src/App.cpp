@@ -20,6 +20,8 @@ namespace CBE
 	//Model g_triangle;
 	Model g_rect;
 	Entity g_rectObj;
+
+	Texture g_testTexture;
 	
 	App* App::s_instance = nullptr;
 
@@ -59,14 +61,19 @@ namespace CBE
 		//TEMP(fix): Just to mess around with OpenGL
 
 		Mesh temp;
+		g_testTexture.width = 1;
+		g_testTexture.height = 1;
+		g_testTexture.comps = 1;
 
-#define DRAW_HEX
+		g_testTexture.PushToGPU(WHITE_PIXEL_DATA);
+
+#define DRAW_RECT
 
 #if defined(DRAW_RECT)
-		temp.EmplaceVertex(glm::vec3{-0.5f, 0.5f, 0.0f}, glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
-		temp.EmplaceVertex(glm::vec3{-0.5f, -0.5f, 0.0f}, glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
-		temp.EmplaceVertex(glm::vec3{0.5f, -0.5f, 0.0f}, glm::vec4{0.0f, 0.0f, 1.0f, 1.0f});
-		temp.EmplaceVertex(glm::vec3{0.5f, 0.5f, 0.0f});
+		temp.EmplaceVertex(glm::vec3{-0.5f, 0.5f, 0.0f}, glm::vec4{1.0f, 0.0f, 0.0f, 1.0f}, glm::vec2{0.0f, 1.0f});
+		temp.EmplaceVertex(glm::vec3{-0.5f, -0.5f, 0.0f}, glm::vec4{0.0f, 1.0f, 0.0f, 1.0f}, glm::vec2{0.0f, 0.0f});
+		temp.EmplaceVertex(glm::vec3{0.5f, -0.5f, 0.0f}, glm::vec4{0.0f, 0.0f, 1.0f, 1.0f}, glm::vec2{1.0f, 0.0f});
+		temp.EmplaceVertex(glm::vec3{0.5f, 0.5f, 0.0f}, glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, glm::vec2{1.0f, 1.0f});
 
 		temp.indices.emplace_back(0);
 		temp.indices.emplace_back(1);
@@ -99,6 +106,7 @@ namespace CBE
 		temp.Setup();
 
 		g_rect.meshes.emplace_back(temp);
+		g_rect.texture = &g_testTexture;
 		g_rect.shaderProgram = new ShaderProgram();
 
 		Shader* vShader = new Shader(Shader::VERT, DEFAULT_VERT_SHADER_SRC, "DEFAULT_VERT_SHADER_SRC");
@@ -110,6 +118,11 @@ namespace CBE
 		g_rect.shaderProgram->AttachVertShader(vShader);
 		g_rect.shaderProgram->AttachFragShader(fShader);
 		g_rect.shaderProgram->Link();
+
+		g_rect.shaderProgram->Use();
+		g_rect.shaderProgram->Uniform1i("aTexture", 0);
+
+		glUseProgram(0);
 
 		g_rectObj.AddTransform();
 		g_rectObj.AddModel(g_rect);
@@ -134,6 +147,9 @@ namespace CBE
 		modComp->model.shaderProgram->UniformMatrix4fv("view", 1, GL_FALSE, ::glm::value_ptr(App::Instance().m_renderer->camera.ViewMatrix()));
 		modComp->model.shaderProgram->Uniform1i("ticks", App::Instance().ticks);
 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, modComp->model.texture->id);
+
 		for (Mesh& mesh : modComp->model.meshes) 
 		{
 			mesh.vao.Bind();
@@ -150,10 +166,8 @@ namespace CBE
 		m_renderer->Begin();
 		
 		//TODO(fix): per model
-		//g_rect.Draw();
-		//g_rectObj.modelComp->model.Draw();
 		DrawSystem(g_rectObj);
-		g_rectObj.transform->rotation.z += 1.0f;
+		g_rectObj.transform->rotation.z += 15.0f * deltaTime;
 
 		m_renderer->End();
 		SDL_GL_SwapWindow(m_window);

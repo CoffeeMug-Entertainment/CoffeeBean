@@ -58,6 +58,8 @@ namespace CBE
 
 		glVertexAttribPointer(layout + 1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, color)));
 		glEnableVertexAttribArray(layout + 1);
+		glVertexAttribPointer(layout + 2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+		glEnableVertexAttribArray(layout + 2);
 
 		vbo->Unbind();
 	}

@@ -3,6 +3,7 @@
 
 #include "Buffers.h"
 
+#include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 
@@ -14,6 +15,7 @@ namespace CBE
 	{
 		glm::vec3 position;
 		glm::vec4 color;
+		glm::vec2 texCoords;
 	};
 
 	struct Mesh
@@ -25,7 +27,7 @@ namespace CBE
 		std::vector<unsigned int> indices;
 
 		void Setup();
-		void EmplaceVertex(glm::vec3 position = {0.0f, 0.0f, 0.0f}, glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f});
+		void EmplaceVertex(glm::vec3 position = {0.0f, 0.0f, 0.0f}, glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f}, glm::vec2 texCoords = {0.0f, 1.0f});
 	};
 }
 

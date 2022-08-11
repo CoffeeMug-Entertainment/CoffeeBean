@@ -16,8 +16,8 @@ namespace CBE
 		ebo.Unbind();
 	}
 
-	void Mesh::EmplaceVertex(glm::vec3 position, glm::vec4 color)
+	void Mesh::EmplaceVertex(glm::vec3 position, glm::vec4 color, glm::vec2 texCoords)
 	{
-		vertices.emplace_back(Vertex{position, color});
+		vertices.emplace_back(Vertex{position, color, texCoords});
 	}
 }

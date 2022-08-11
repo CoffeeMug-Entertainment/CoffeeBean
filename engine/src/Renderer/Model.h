@@ -3,6 +3,7 @@
 
 #include "Mesh.h"
 #include "Shader.h"
+#include "Texture.h"
 
 namespace CBE
 {
@@ -10,7 +11,8 @@ namespace CBE
 	{
 		std::vector<Mesh> meshes;
 		ShaderProgram* shaderProgram;
-		
+		Texture* texture;
+
 		void Draw();
 	};
 }
