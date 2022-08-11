@@ -20,7 +20,9 @@ namespace CBE
 			exit(-3);
 		}
 
-		SDL_GL_SetSwapInterval(1);
+		//NOTE(fhomolka): This is a bit misleadingly named
+		//				  It doesn't ask for an interval, just whether you wants VSync or not
+		SDL_GL_SetSwapInterval(GL_TRUE);
 
 		if(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
 		{
