@@ -30,4 +30,10 @@
 
 * Version: 2.27
 * License: Public Domain or MIT
-* Acquried from: https://github.com/nothings/stb
+* Acquired from: https://github.com/nothings/stb
+
+## Assimp
+
+* Version: 5.2.4
+* License: Assimp License (modified BSD-3)
+* Acquired from: https://github.com/assimp/assimp/releases/tag/v5.2.4
