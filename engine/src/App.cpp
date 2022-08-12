@@ -62,16 +62,17 @@ namespace CBE
 
 		//TEMP(fix): Just to mess around with OpenGL
 		stbi_set_flip_vertically_on_load(true);
-		Mesh temp;
+
 		g_testTexture.width = 1;
 		g_testTexture.height = 1;
-		g_testTexture.comps = 1;
+		g_testTexture.comps = 4;
 		std::string a = "test.png";
 		unsigned char* test_img_data = g_testTexture.Load(a);
 		//g_testTexture.PushToGPU(WHITE_PIXEL_DATA);
 		g_testTexture.PushToGPU(test_img_data);
 		stbi_image_free(test_img_data);
 
+		Mesh temp;
 #define DRAW_RECT
 
 #if defined(DRAW_RECT)
@@ -110,7 +111,14 @@ namespace CBE
 #endif
 		temp.Setup();
 
-		g_rect.meshes.emplace_back(temp);
+		//g_rect.meshes.emplace_back(temp);
+		std::string modelPath = "teapot.obj";
+		g_rect.Load(modelPath);
+		spdlog::info("Test model has {} meshes", g_rect.meshes.size());
+		for(unsigned int i = 0; i < g_rect.meshes.size(); ++i)
+		{
+			spdlog::info("Mesh {} has {} vertices and {} indices", i, g_rect.meshes[i].vertices.size(), g_rect.meshes[i].indices.size());
+		}
 		g_rect.texture = &g_testTexture;
 		g_rect.shaderProgram = new ShaderProgram();
 
@@ -172,7 +180,7 @@ namespace CBE
 		
 		//TODO(fix): per model
 		DrawSystem(g_rectObj);
-		g_rectObj.transform->rotation.z += 15.0f * deltaTime;
+		//g_rectObj.transform->rotation.z += 15.0f * deltaTime;
 
 		m_renderer->End();
 		SDL_GL_SwapWindow(m_window);

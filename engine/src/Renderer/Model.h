@@ -14,6 +14,7 @@ namespace CBE
 		Texture* texture;
 
 		void Draw();
+		void Load(std::string& path);
 	};
 }
 
