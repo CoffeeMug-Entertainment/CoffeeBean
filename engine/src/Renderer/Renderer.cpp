@@ -35,6 +35,9 @@ namespace CBE
 		glViewport(0, 0, w, h);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
+		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		spdlog::info("\nOpenGL Info:\n\tVendor: {}\n\tRenderer: {}\n\tVersion: {}", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
 	}
