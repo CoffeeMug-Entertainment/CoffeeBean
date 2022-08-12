@@ -26,9 +26,14 @@ set(GLM_DIR engine/thirdparty/glm)
 set(GLM_INC_DIR ${GLM_DIR})
 add_subdirectory(${GLM_DIR})
 
-#stb
+# stb
 set(STB_DIR engine/thirdparty/stb)
 set(STB_INC_DIR ${STB_DIR})
+
+# assimp
+set(ASI_DIR engine/thirdparty/assimp)
+set(ASI_INC_DIR ${ASI_DIR}/include)
+add_subdirectory(${ASI_DIR})
 
 set(CBE_SRC_DIR engine/src)
 file(GLOB CBE_SRC 
