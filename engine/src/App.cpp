@@ -229,7 +229,7 @@ namespace CBE
 				case SDL_MOUSEMOTION:
 #if 1
 					mouseMovement = glm::vec2{m_event.motion.xrel, m_event.motion.yrel};
-					m_renderer->camera.MouseLook(mouseMovement,  deltaTime);
+					m_renderer->camera.MouseLook(mouseMovement,  deltaTime * 4);
 					//m_renderer->camera.target.x += mouseMovement.x * deltaTime;
 					//m_renderer->camera.target.y -= mouseMovement.y * deltaTime;
 #endif

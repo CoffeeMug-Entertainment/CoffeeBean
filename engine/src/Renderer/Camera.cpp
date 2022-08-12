@@ -49,9 +49,11 @@ namespace CBE
 	void Camera::ToDefault()
 	{
 		position = {0.0f, 0.0f, 1.0f};
+		rotation = {0.0f, 0.0f, 0.0f};
 		target = {0.0f, 0.0f, 0.0f};
 		up = {0.0f, 1.0f, 0.0f};
 		right = {1.0f, 0.0f, 0.0f};
+		forward = {0.0f, 0.0f, -1.0f};
 		fov = 90.0f;
 
 		/*
