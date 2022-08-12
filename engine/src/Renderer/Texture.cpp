@@ -14,9 +14,9 @@ namespace CBE
 		{
 			spdlog::error("Failed to load {}\n\t Reason: {}", filePath, stbi_failure_reason());
 			return nullptr;
-  		}
+		}
 
-		stbi_image_free(tex_data);
+		//stbi_image_free(tex_data);
 		return tex_data;
 	}
 
@@ -25,7 +25,30 @@ namespace CBE
 		glGenTextures(1, &id);
 		glBindTexture(GL_TEXTURE_2D, id);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		GLint gl_format;
+
+		switch (comps) 
+		{
+			case 4:
+				gl_format = GL_RGBA;
+				break;
+			case 3:
+				gl_format = GL_RGB;
+				break;
+			default:
+				spdlog::warn("Image format not yet implemented, assuming GL_RGB! comps: {}", comps);
+				gl_format = GL_RGB;
+				break;
+		}
+
+		glTexImage2D(GL_TEXTURE_2D, 0, gl_format, width, height, 0, gl_format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 }

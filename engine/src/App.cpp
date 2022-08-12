@@ -9,8 +9,8 @@
 #include "Entities/Entity.h"
 #include "Renderer/Model.h"
 
-
 #include "glm/gtc/type_ptr.hpp"
+#include "stb_image.h"
 
 #include <iostream>
 
@@ -64,8 +64,11 @@ namespace CBE
 		g_testTexture.width = 1;
 		g_testTexture.height = 1;
 		g_testTexture.comps = 1;
-
-		g_testTexture.PushToGPU(WHITE_PIXEL_DATA);
+		std::string a = "test.png";
+		unsigned char* test_img_data = g_testTexture.Load(a);
+		//g_testTexture.PushToGPU(WHITE_PIXEL_DATA);
+		g_testTexture.PushToGPU(test_img_data);
+		stbi_image_free(test_img_data);
 
 #define DRAW_RECT
 
