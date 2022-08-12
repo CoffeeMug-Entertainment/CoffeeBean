@@ -59,7 +59,7 @@ namespace CBE
 		ticks = 0;
 
 		//TEMP(fix): Just to mess around with OpenGL
-
+		stbi_set_flip_vertically_on_load(true);
 		Mesh temp;
 		g_testTexture.width = 1;
 		g_testTexture.height = 1;
