@@ -31,7 +31,7 @@ namespace CBE
 		if (s_instance) {
 			spdlog::error("App instance already exits!");
 			return;
-  		}
+		}
 
 		s_instance = this;
 
@@ -39,7 +39,7 @@ namespace CBE
 		if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 			spdlog::error("Failed to init SDL!\n\t{}", SDL_GetError());
 			exit(-1);
-  		}
+		}
 
 		m_window = SDL_CreateWindow("CoffeeBean",
 									SDL_WINDOWPOS_CENTERED,
@@ -51,12 +51,14 @@ namespace CBE
 		if (m_window == nullptr) {
 			spdlog::error("Failed to make window!\n\t{}", SDL_GetError());
 			exit(-2);
-  		}
+		}
 
 		m_renderer = std::unique_ptr<Renderer>(new Renderer(m_window));
 		m_renderer->camera.ToDefault();
 		m_running = true;
 		ticks = 0;
+
+		SDL_SetRelativeMouseMode(SDL_TRUE);
 
 		//TEMP(fix): Just to mess around with OpenGL
 		stbi_set_flip_vertically_on_load(true);
@@ -194,48 +196,56 @@ namespace CBE
 
 	void App::ProcessEvents()
 	{
-		SDL_PollEvent(&m_event);
-
-		switch(m_event.type)
+		glm::vec2 mouseMovement; 
+		while(SDL_PollEvent(&m_event))
 		{
-			case SDL_QUIT:
-				m_running = false;
-				break;
-			case SDL_KEYDOWN:
-				if(m_event.key.keysym.sym == SDLK_ESCAPE) {m_running = false;}
-//TEMP(fhomolka): just a neat place to move around
+			switch(m_event.type)
+			{
+				case SDL_QUIT:
+					m_running = false;
+					break;
+				case SDL_KEYDOWN:
+					if(m_event.key.keysym.sym == SDLK_ESCAPE) {m_running = false;}
+	//TEMP(fhomolka): just a neat place to move around
 #if 1
-				if(m_event.key.keysym.sym == SDLK_a) 
-				{
-					m_renderer->camera.position.x -= 1.0f;
-					m_renderer->camera.target.x -= 1.0f;
-				}
-				if(m_event.key.keysym.sym == SDLK_d) 
-				{
-					m_renderer->camera.position.x += 1.0f;
-					m_renderer->camera.target.x += 1.0f;
-				}
-				if(m_event.key.keysym.sym == SDLK_w) 
-				{
-					m_renderer->camera.position.y += 1.0f;
-					m_renderer->camera.target.y += 1.0f;
-				}
-				if(m_event.key.keysym.sym == SDLK_s) 
-				{
-					m_renderer->camera.position.y -= 1.0f;
-					m_renderer->camera.target.y -= 1.0f;
-				}
+					if(m_event.key.keysym.sym == SDLK_a) 
+					{
+						m_renderer->camera.position.x -= 1.0f;
+						m_renderer->camera.target.x -= 1.0f;
+					}
+					if(m_event.key.keysym.sym == SDLK_d) 
+					{
+						m_renderer->camera.position.x += 1.0f;
+						m_renderer->camera.target.x += 1.0f;
+					}
+					if(m_event.key.keysym.sym == SDLK_w) 
+					{
+						m_renderer->camera.position.y += 1.0f;
+						m_renderer->camera.target.y += 1.0f;
+					}
+					if(m_event.key.keysym.sym == SDLK_s) 
+					{
+						m_renderer->camera.position.y -= 1.0f;
+						m_renderer->camera.target.y -= 1.0f;
+					}
 
-				if(m_event.key.keysym.sym == SDLK_KP_8) {m_renderer->camera.target.y += 1.0f;}
-				if(m_event.key.keysym.sym == SDLK_KP_2) {m_renderer->camera.target.y -= 1.0f;}
-				if(m_event.key.keysym.sym == SDLK_KP_6) {m_renderer->camera.target.x += 1.0f;}
-				if(m_event.key.keysym.sym == SDLK_KP_4) {m_renderer->camera.target.x -= 1.0f;}
+					if(m_event.key.keysym.sym == SDLK_KP_8) {m_renderer->camera.target.y += 1.0f;}
+					if(m_event.key.keysym.sym == SDLK_KP_2) {m_renderer->camera.target.y -= 1.0f;}
+					if(m_event.key.keysym.sym == SDLK_KP_6) {m_renderer->camera.target.x += 1.0f;}
+					if(m_event.key.keysym.sym == SDLK_KP_4) {m_renderer->camera.target.x -= 1.0f;}
 #endif
-				break;
-			case SDL_MOUSEMOTION:
-				break;
-			default:
-				break;
+					break;
+				case SDL_MOUSEMOTION:
+#if 1
+					mouseMovement = glm::vec2{m_event.motion.xrel, m_event.motion.yrel};
+					
+					m_renderer->camera.target.x += mouseMovement.x * deltaTime;
+					m_renderer->camera.target.y -= mouseMovement.y * deltaTime;
+#endif
+					break;
+				default:
+					break;
+			}
 		}
 	}
 }
