@@ -34,6 +34,6 @@
 
 ## Assimp
 
-* Version: 5.2.4
+* Version: git commit 888468e8f70d7379ac717d070244ef943e66ba41
 * License: Assimp License (modified BSD-3)
-* Acquired from: https://github.com/assimp/assimp/releases/tag/v5.2.4
+* Acquired from: https://github.com/assimp/assimp/tree/888468e8f70d7379ac717d070244ef943e66ba41
