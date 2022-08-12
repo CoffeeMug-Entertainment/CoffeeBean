@@ -210,37 +210,28 @@ namespace CBE
 #if 1
 					if(m_event.key.keysym.sym == SDLK_a) 
 					{
-						m_renderer->camera.position.x -= 1.0f;
-						m_renderer->camera.target.x -= 1.0f;
+						m_renderer->camera.position -= m_renderer->camera.right;
 					}
 					if(m_event.key.keysym.sym == SDLK_d) 
 					{
-						m_renderer->camera.position.x += 1.0f;
-						m_renderer->camera.target.x += 1.0f;
+						m_renderer->camera.position += m_renderer->camera.right;
 					}
 					if(m_event.key.keysym.sym == SDLK_w) 
 					{
-						m_renderer->camera.position.y += 1.0f;
-						m_renderer->camera.target.y += 1.0f;
+						m_renderer->camera.position += m_renderer->camera.forward;
 					}
 					if(m_event.key.keysym.sym == SDLK_s) 
 					{
-						m_renderer->camera.position.y -= 1.0f;
-						m_renderer->camera.target.y -= 1.0f;
+						m_renderer->camera.position -= m_renderer->camera.forward;
 					}
-
-					if(m_event.key.keysym.sym == SDLK_KP_8) {m_renderer->camera.target.y += 1.0f;}
-					if(m_event.key.keysym.sym == SDLK_KP_2) {m_renderer->camera.target.y -= 1.0f;}
-					if(m_event.key.keysym.sym == SDLK_KP_6) {m_renderer->camera.target.x += 1.0f;}
-					if(m_event.key.keysym.sym == SDLK_KP_4) {m_renderer->camera.target.x -= 1.0f;}
 #endif
 					break;
 				case SDL_MOUSEMOTION:
 #if 1
 					mouseMovement = glm::vec2{m_event.motion.xrel, m_event.motion.yrel};
-					
-					m_renderer->camera.target.x += mouseMovement.x * deltaTime;
-					m_renderer->camera.target.y -= mouseMovement.y * deltaTime;
+					m_renderer->camera.MouseLook(mouseMovement,  deltaTime);
+					//m_renderer->camera.target.x += mouseMovement.x * deltaTime;
+					//m_renderer->camera.target.y -= mouseMovement.y * deltaTime;
 #endif
 					break;
 				default:

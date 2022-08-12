@@ -14,7 +14,7 @@ namespace CBE
 	glm::mat4 Camera::ViewMatrix()
 	{
 		glm::mat4 matrix;
-		matrix = glm::lookAt(position, target, up);
+		matrix = glm::lookAt(position, position + forward, up);
 		return matrix;
 	}
 	
@@ -29,6 +29,21 @@ namespace CBE
 	{
 		position += deltaPos;
 		target += deltaPos;
+	}
+
+	void Camera::MouseLook(glm::vec2 mouseMovement, float deltaTime)
+	{
+		rotation.x -= mouseMovement.y * deltaTime;
+		rotation.y += mouseMovement.x * deltaTime;
+		rotation.x = std::clamp<float>(rotation.x, -89.0f, 89.0f);
+
+		forward.x = cos(glm::radians(rotation.y)) * cos(glm::radians(rotation.x));
+		forward.y = sin(glm::radians(rotation.x));
+		forward.z = sin(glm::radians(rotation.y)) * cos(glm::radians(rotation.x));
+		forward = glm::normalize(forward);
+
+		right = glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
+		up = glm::normalize(glm::cross(right, forward));
 	}
 
 	void Camera::ToDefault()
