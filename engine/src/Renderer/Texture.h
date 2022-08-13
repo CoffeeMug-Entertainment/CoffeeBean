@@ -21,5 +21,7 @@ namespace CBE
 
 	extern Texture WHITE_PIXEL;
 	extern unsigned char WHITE_PIXEL_DATA[1 * 1 * 4 + 1];
+	extern Texture MISSING_TEX;
+	extern unsigned char MISSING_TEX_DATA[2 * 2 * 4 + 1];
 }
 #endif

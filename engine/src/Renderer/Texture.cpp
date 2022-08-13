@@ -7,6 +7,9 @@ namespace CBE
 	Texture WHITE_PIXEL = {0, 1, 1, 4};
 	unsigned char WHITE_PIXEL_DATA[1 * 1 * 4 + 1] = "\377\377\377\377";
 
+	Texture MISSING_TEX = {0, 2, 2, 4};
+	unsigned char MISSING_TEX_DATA[2 * 2 * 4 + 1] = "\300\377\356\377K\037\016\377K\037\016\377\300\377\356\377";
+
 	unsigned char* Texture::Load(std::string& filePath)
 	{
 		unsigned char* tex_data = stbi_load(filePath.c_str(), &width, &height, &comps, 0);
