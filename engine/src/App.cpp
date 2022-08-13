@@ -21,8 +21,6 @@ namespace CBE
 	Model g_rect;
 	Entity g_rectObj;
 
-	Texture g_testTexture;
-	
 	App* App::s_instance = nullptr;
 
 
@@ -62,15 +60,6 @@ namespace CBE
 
 		//TEMP(fix): Just to mess around with OpenGL
 		stbi_set_flip_vertically_on_load(true);
-
-		g_testTexture.width = 1;
-		g_testTexture.height = 1;
-		g_testTexture.comps = 4;
-		std::string a = "test.png";
-		unsigned char* test_img_data = g_testTexture.Load(a);
-		//g_testTexture.PushToGPU(WHITE_PIXEL_DATA);
-		g_testTexture.PushToGPU(test_img_data);
-		stbi_image_free(test_img_data);
 
 		Mesh temp;
 #define DRAW_RECT
@@ -112,7 +101,7 @@ namespace CBE
 		temp.Setup();
 
 		//g_rect.meshes.emplace_back(temp);
-		std::string modelPath = "teapot.obj";
+		std::string modelPath = "box.obj";
 		g_rect.Load(modelPath);
 		spdlog::info("Test model has {} meshes", g_rect.meshes.size());
 		for(unsigned int i = 0; i < g_rect.meshes.size(); ++i)
@@ -120,10 +109,6 @@ namespace CBE
 			spdlog::info("Mesh {} has {} vertices and {} indices", i, g_rect.meshes[i].vertices.size(), g_rect.meshes[i].indices.size());
 		}
 
-		for (auto& mesh : g_rect.meshes) 
-		{
-			mesh.texture = &g_testTexture;
-  		}
 		g_rect.shaderProgram = new ShaderProgram();
 
 		Shader* vShader = new Shader(Shader::VERT, DEFAULT_VERT_SHADER_SRC, "DEFAULT_VERT_SHADER_SRC");
