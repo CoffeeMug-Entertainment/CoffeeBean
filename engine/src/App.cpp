@@ -231,21 +231,28 @@ namespace CBE
 					if(m_event.key.keysym.sym == SDLK_ESCAPE) {m_running = false;}
 	//TEMP(fhomolka): just a neat place to move around
 #if 1
-					if(m_event.key.keysym.sym == SDLK_a) 
+					switch(m_event.key.keysym.sym)
 					{
-						m_renderer->camera.position -= m_renderer->camera.right;
-					}
-					if(m_event.key.keysym.sym == SDLK_d) 
-					{
-						m_renderer->camera.position += m_renderer->camera.right;
-					}
-					if(m_event.key.keysym.sym == SDLK_w) 
-					{
-						m_renderer->camera.position += m_renderer->camera.forward;
-					}
-					if(m_event.key.keysym.sym == SDLK_s) 
-					{
-						m_renderer->camera.position -= m_renderer->camera.forward;
+						case SDLK_a:
+							m_renderer->camera.position -= m_renderer->camera.right * deltaTime;
+							break;
+						case SDLK_d:
+							m_renderer->camera.position += m_renderer->camera.right * deltaTime;
+							break;
+						case SDLK_w:
+							m_renderer->camera.position += m_renderer->camera.forward * deltaTime;
+							break;
+						case SDLK_s:
+							m_renderer->camera.position -= m_renderer->camera.forward * deltaTime;
+							break;
+						case SDLK_SPACE:
+							m_renderer->camera.position += m_renderer->camera.up * deltaTime;
+							break;
+						case SDLK_c:
+							m_renderer->camera.position -= m_renderer->camera.up * deltaTime;
+							break;
+						default:
+							break;
 					}
 #endif
 					break;
