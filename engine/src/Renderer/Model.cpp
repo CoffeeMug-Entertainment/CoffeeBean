@@ -6,6 +6,7 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include "spdlog/spdlog.h"
+#include "stb_image.h"
 
 namespace CBE
 {
@@ -52,6 +53,41 @@ namespace CBE
 				newMesh.indices.emplace_back(mesh->mFaces[i].mIndices[j]);
 			}
 		}
+		
+		//TODO(fhomolka): Multiple textures and embeded textures
+		Texture* newTex = new Texture();
+		if(mesh->mMaterialIndex > 0)
+		{
+			aiString texPath;
+			scene->mMaterials[mesh->mMaterialIndex]->GetTexture(aiTextureType_DIFFUSE, 0,  &texPath);
+			std::string texPathStr = std::string(texPath.C_Str());
+			spdlog::info("Texture path: {}", texPathStr);
+			unsigned char* data = newTex->Load(texPathStr);
+			if (!data) 
+			{
+				newTex->width = MISSING_TEX.width;
+				newTex->height = MISSING_TEX.height;
+				newTex->comps = MISSING_TEX.comps;
+   				newTex->PushToGPU(MISSING_TEX_DATA);
+			}
+			else
+			{
+				newTex->PushToGPU(data);
+			}
+			stbi_image_free(data);
+
+		}
+		else
+		{
+			newTex->width = MISSING_TEX.width;
+			newTex->height = MISSING_TEX.height;
+			newTex->comps = MISSING_TEX.comps;
+			newTex->PushToGPU(MISSING_TEX_DATA);
+			
+		}
+
+		newMesh.texture = newTex;
+
 
 		return newMesh;
 	}
