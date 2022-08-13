@@ -119,7 +119,11 @@ namespace CBE
 		{
 			spdlog::info("Mesh {} has {} vertices and {} indices", i, g_rect.meshes[i].vertices.size(), g_rect.meshes[i].indices.size());
 		}
-		g_rect.texture = &g_testTexture;
+
+		for (auto& mesh : g_rect.meshes) 
+		{
+			mesh.texture = &g_testTexture;
+  		}
 		g_rect.shaderProgram = new ShaderProgram();
 
 		Shader* vShader = new Shader(Shader::VERT, DEFAULT_VERT_SHADER_SRC, "DEFAULT_VERT_SHADER_SRC");
@@ -160,11 +164,11 @@ namespace CBE
 		modComp->model.shaderProgram->UniformMatrix4fv("view", 1, GL_FALSE, ::glm::value_ptr(App::Instance().m_renderer->camera.ViewMatrix()));
 		modComp->model.shaderProgram->Uniform1i("ticks", App::Instance().ticks);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, modComp->model.texture->id);
 
 		for (Mesh& mesh : modComp->model.meshes) 
 		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, mesh.texture->id);
 			mesh.vao.Bind();
 			glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);
 			mesh.vao.Unbind();

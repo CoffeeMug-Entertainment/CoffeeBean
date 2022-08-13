@@ -7,6 +7,8 @@
 #include "glm/vec3.hpp"
 #include "glm/vec4.hpp"
 
+#include "Texture.h"
+
 #include <vector>
 
 namespace CBE
@@ -25,6 +27,7 @@ namespace CBE
 		EBO ebo;
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
+		Texture* texture;
 
 		void Setup();
 		void EmplaceVertex(glm::vec3 position = {0.0f, 0.0f, 0.0f}, glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f}, glm::vec2 texCoords = {0.0f, 0.0f});
