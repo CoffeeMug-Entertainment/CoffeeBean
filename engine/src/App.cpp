@@ -21,6 +21,9 @@ namespace CBE
 	Model g_rect;
 	Entity g_rectObj;
 
+	Model g_light;
+	Entity g_lightObj;
+
 	App* App::s_instance = nullptr;
 
 
@@ -128,6 +131,28 @@ namespace CBE
 
 		g_rectObj.AddTransform();
 		g_rectObj.AddModel(g_rect);
+
+		g_light.Load(modelPath);
+		Shader* vLightShader = new Shader(Shader::VERT, DEFAULT_VERT_LIGHT_SHADER_SRC, "DEFAULT_VERT_LIGHT_SHADER_SRC");
+		Shader* fLightShader = new Shader(Shader::FRAG, DEFAULT_FRAG_LIGHT_SHADER_SRC, "DEFAULT_FRAG_LIGHT_SHADER_SRC");
+
+		g_light.shaderProgram = new ShaderProgram();
+
+		vLightShader->Compile();
+		fLightShader->Compile();
+		g_light.shaderProgram->AttachVertShader(vLightShader);
+		g_light.shaderProgram->AttachFragShader(fLightShader);
+		g_light.shaderProgram->Link();
+
+		g_light.shaderProgram->Use();
+		g_rect.shaderProgram->Uniform3f("objectColor", 1.0f, 0.5f, 0.31f);
+		g_rect.shaderProgram->Uniform3f("objectColor", 1.0f, 1.0f, 1.0f);
+		glUseProgram(0);
+
+		g_lightObj.AddTransform();
+		g_lightObj.AddModel(g_light);
+
+		g_lightObj.transform->position = {1.2f, 1.0f, 2.0f};
 	}
 
 	App::~App() 
@@ -168,6 +193,7 @@ namespace CBE
 		m_renderer->Begin();
 		
 		//TODO(fix): per model
+		DrawSystem(g_lightObj);
 		DrawSystem(g_rectObj);
 		//g_rectObj.transform->rotation.z += 15.0f * deltaTime;
 

@@ -46,6 +46,35 @@ namespace CBE
 		FragColor = texture(aTexture, texCoord) * vertColor;
 	}
 	)glsl";
+
+	const std::string DEFAULT_VERT_LIGHT_SHADER_SRC = R"glsl(
+	#version 330 core
+
+	layout (location = 0) in vec3 aPos;
+
+	uniform mat4 transform;
+	uniform mat4 projection;
+	uniform mat4 view;
+
+	void main()
+	{
+		gl_Position = projection * view * transform * vec4(aPos, 1.0);
+	}
+	)glsl";
+
+	const std::string DEFAULT_FRAG_LIGHT_SHADER_SRC = R"glsl(
+	#version 330 core
+
+	out vec4 FragColor;
+
+	uniform vec3 objectColor;
+	uniform vec3 lightColor;
+
+	void main()
+	{
+		FragColor = vec4(1.0);
+	}
+	)glsl";
 }
 
 #endif
