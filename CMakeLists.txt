@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 # SDL2
 set(SDL_DIR engine/thirdparty/SDL2)
 set(SDL_INC_DIR ${SDL_DIR}/include)
+set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${SDL_DIR})
 
 # GLAD
