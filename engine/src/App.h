@@ -22,11 +22,11 @@ namespace CBE
 			//unsigned long long deltaTicks;
 			float deltaTime;
 			std::unique_ptr<Renderer> m_renderer;
+			SDL_Window* m_window;
 		private:
 
 			static App* s_instance;
 			//TODO(Fix): Smart pointers - unique_ptr
-			SDL_Window* m_window;
 			SDL_Event m_event;
 
 			bool m_running;
