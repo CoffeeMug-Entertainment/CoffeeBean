@@ -3,6 +3,8 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "spdlog/spdlog.h"
+#include "App.h"
+#include "SDL_opengl.h"
 
 namespace CBE
 {
@@ -21,7 +23,9 @@ namespace CBE
 	glm::mat4 Camera::ProjectionMatrix()
 	{
 		glm::mat4 matrix;
-		matrix = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+		int w,h;
+		SDL_GL_GetDrawableSize(App::Instance().m_window, &w, &h);
+		matrix = glm::perspective(glm::radians(fov), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.0f);
 		return matrix;
 	}
 
