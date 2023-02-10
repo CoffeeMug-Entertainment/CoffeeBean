@@ -21,8 +21,10 @@ namespace CBE
 	Model g_rect;
 	Entity g_rectObj;
 
+#if 0
 	Model g_light;
 	Entity g_lightObj;
+#endif
 
 	App* App::s_instance = nullptr;
 
@@ -45,8 +47,8 @@ namespace CBE
 		m_window = SDL_CreateWindow("CoffeeBean",
 									SDL_WINDOWPOS_CENTERED,
 									SDL_WINDOWPOS_CENTERED,
-									800,
-									600,
+									1280,
+									720,
 									SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
 
 		if (m_window == nullptr) {
@@ -87,6 +89,7 @@ namespace CBE
 		g_rectObj.AddTransform();
 		g_rectObj.AddModel(g_rect);
 
+#if 0
 		g_light.Load(modelPath);
 		Shader* vLightShader = new Shader(Shader::VERT, DEFAULT_VERT_LIGHT_SHADER_SRC, "DEFAULT_VERT_LIGHT_SHADER_SRC");
 		Shader* fLightShader = new Shader(Shader::FRAG, DEFAULT_FRAG_LIGHT_SHADER_SRC, "DEFAULT_FRAG_LIGHT_SHADER_SRC");
@@ -108,6 +111,7 @@ namespace CBE
 		g_lightObj.AddModel(g_light);
 
 		g_lightObj.transform->position = {1.2f, 1.0f, 2.0f};
+#endif
 	}
 
 	App::~App() 
@@ -148,7 +152,7 @@ namespace CBE
 		m_renderer->Begin();
 		
 		//TODO(fix): per model
-		DrawSystem(g_lightObj);
+		//DrawSystem(g_lightObj);
 		DrawSystem(g_rectObj);
 		//g_rectObj.transform->rotation.z += 15.0f * deltaTime;
 
