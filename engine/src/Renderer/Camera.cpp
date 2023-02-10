@@ -25,7 +25,9 @@ namespace CBE
 		glm::mat4 matrix;
 		int w,h;
 		SDL_GL_GetDrawableSize(App::Instance().m_window, &w, &h);
-		matrix = glm::perspective(glm::radians(fov), static_cast<float>(w) / static_cast<float>(h), 0.1f, 100.0f);
+		float aspect = static_cast<float>(w) / static_cast<float>(h);
+		float fovy = fov / aspect;
+		matrix = glm::perspective(glm::radians(fovy), aspect, 0.00001f, 100.0f);
 		return matrix;
 	}
 
