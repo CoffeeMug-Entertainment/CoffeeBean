@@ -44,6 +44,10 @@ set(BUILD_SHARED_LIBS OFF)
 set(ASSIMP_BUILD_ZLIB ON)
 add_subdirectory(${ASI_DIR})
 
+# EnTT
+set(ENTT_DIR engine/thirdparty/EnTT)
+add_subdirectory(${ENTT_DIR})
+
 set(CBE_SRC_DIR engine/src)
 file(GLOB CBE_SRC 
 	${CBE_SRC_DIR}/header_impl.cpp
@@ -74,9 +78,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${GLM_INC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${STB_INC_DIR})
 
 IF(WIN32)
-	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2-static SDL2::SDL2main assimp)
+	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2-static SDL2::SDL2main assimp EnTT::EnTT)
 ELSEIF(UNIX)
-	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2-static assimp::assimp m pthread dl -static-libgcc -static-libstdc++)
+	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2-static assimp::assimp EnTT::EnTT m pthread dl -static-libgcc -static-libstdc++)
 ENDIF()
 
 target_link_libraries(${PROJECT_NAME} ${CBE_LDFLAGS})
