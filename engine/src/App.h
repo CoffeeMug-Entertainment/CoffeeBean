@@ -4,6 +4,8 @@
 #include "Renderer/Renderer.h"
 
 #include "SDL.h"
+#include "entt/entity/fwd.hpp"
+#include "entt/entt.hpp"
 
 #include <memory>
 
@@ -15,6 +17,7 @@ namespace CBE
 			App();
 			~App();
 			void Render();
+			void Update();
 			int Loop();
 			static App& Instance() {return *s_instance;}
 			unsigned long long ticks;
@@ -23,6 +26,8 @@ namespace CBE
 			float deltaTime;
 			std::unique_ptr<Renderer> m_renderer;
 			SDL_Window* m_window;
+			entt::registry m_entityRegistry;
+
 		private:
 
 			static App* s_instance;

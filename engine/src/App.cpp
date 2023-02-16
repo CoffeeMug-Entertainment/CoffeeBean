@@ -1,4 +1,5 @@
 #include "App.h"
+#include "entt/entity/fwd.hpp"
 #include "glad/glad.h"
 #include "spdlog/spdlog.h"
 
@@ -86,8 +87,8 @@ namespace CBE
 
 		glUseProgram(0);
 
-		g_rectObj.AddTransform();
-		g_rectObj.AddModel(g_rect);
+		g_rectObj.Create();
+		m_entityRegistry.emplace<ModelComp>(g_rectObj.enttID, g_rect);
 
 #if 0
 		g_light.Load(modelPath);
@@ -121,20 +122,18 @@ namespace CBE
 	}
 
 	//TEMP(Fix)
-	void DrawSystem(Entity& ent)
+	void DrawSystem(TransformComp& trans, ModelComp& modComp)
 	{
-		TransformComp* trans = ent.transform;
-		ModelComp* modComp = ent.modelComp;
 
-		modComp->model.shaderProgram->Use();
+		modComp.model.shaderProgram->Use();
 		
-		modComp->model.shaderProgram->UniformMatrix4fv("transform", 1, GL_FALSE, ::glm::value_ptr(trans->Matrix()));
-		modComp->model.shaderProgram->UniformMatrix4fv("projection", 1, GL_FALSE, ::glm::value_ptr(App::Instance().m_renderer->camera.ProjectionMatrix()));
-		modComp->model.shaderProgram->UniformMatrix4fv("view", 1, GL_FALSE, ::glm::value_ptr(App::Instance().m_renderer->camera.ViewMatrix()));
-		modComp->model.shaderProgram->Uniform1i("ticks", App::Instance().ticks);
+		modComp.model.shaderProgram->UniformMatrix4fv("transform", 1, GL_FALSE, ::glm::value_ptr(trans.Matrix()));
+		modComp.model.shaderProgram->UniformMatrix4fv("projection", 1, GL_FALSE, ::glm::value_ptr(App::Instance().m_renderer->camera.ProjectionMatrix()));
+		modComp.model.shaderProgram->UniformMatrix4fv("view", 1, GL_FALSE, ::glm::value_ptr(App::Instance().m_renderer->camera.ViewMatrix()));
+		modComp.model.shaderProgram->Uniform1i("ticks", App::Instance().ticks);
 
 
-		for (Mesh& mesh : modComp->model.meshes) 
+		for (Mesh& mesh : modComp.model.meshes) 
 		{
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, mesh.texture->id);
@@ -151,13 +150,21 @@ namespace CBE
 	{
 		m_renderer->Begin();
 		
-		//TODO(fix): per model
-		//DrawSystem(g_lightObj);
-		DrawSystem(g_rectObj);
-		//g_rectObj.transform->rotation.z += 15.0f * deltaTime;
+		auto entities = m_entityRegistry.view<TransformComp, ModelComp>();
+		for(auto entity : entities)
+		{
+			TransformComp& trans = entities.get<TransformComp>(entity);
+			ModelComp& model = entities.get<ModelComp>(entity);
+			DrawSystem(trans, model);
+		}
 
 		m_renderer->End();
 		SDL_GL_SwapWindow(m_window);
+	}
+
+	void App::Update()
+	{
+
 	}
 	
 	int App::Loop()
