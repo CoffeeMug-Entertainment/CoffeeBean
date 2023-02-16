@@ -73,7 +73,7 @@ namespace CBE
 		void UniformMatrix4x2fv(std::string name, GLsizei count, GLboolean transpose, const GLfloat* value);
 		void UniformMatrix3x4fv(std::string name, GLsizei count, GLboolean transpose, const GLfloat* value);
 		void UniformMatrix4x3fv(std::string name, GLsizei count, GLboolean transpose, const GLfloat* value);
-	private:
+	//private:
 		GLuint m_id;
 		Shader* m_vertShader;
 		Shader* m_fragShader;

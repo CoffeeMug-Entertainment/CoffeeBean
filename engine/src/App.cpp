@@ -82,7 +82,7 @@ namespace CBE
 		g_rect.shaderProgram->AttachFragShader(fShader);
 		g_rect.shaderProgram->Link();
 
-		g_rect.shaderProgram->Use();
+		glUseProgram(g_rect.shaderProgram->m_id);
 		g_rect.shaderProgram->Uniform1i("aTexture", 0);
 
 		glUseProgram(0);
@@ -124,8 +124,7 @@ namespace CBE
 	//TEMP(Fix)
 	void DrawSystem(TransformComp& trans, ModelComp& modComp)
 	{
-
-		modComp.model.shaderProgram->Use();
+		glUseProgram(modComp.model.shaderProgram->m_id);
 		
 		modComp.model.shaderProgram->UniformMatrix4fv("transform", 1, GL_FALSE, ::glm::value_ptr(trans.Matrix()));
 		modComp.model.shaderProgram->UniformMatrix4fv("projection", 1, GL_FALSE, ::glm::value_ptr(App::Instance().m_renderer->camera.ProjectionMatrix()));
@@ -143,7 +142,6 @@ namespace CBE
 		}
 
 		glUseProgram(0);
-		
 	}
 
 	void App::Render()
