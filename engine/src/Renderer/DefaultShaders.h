@@ -14,15 +14,12 @@ namespace CBE
 	
 	out vec4 vertColor;
 	out vec2 texCoord;
-
-	uniform mat4 transform;
-	uniform mat4 projection;
-	uniform mat4 view;
 	uniform int ticks;
+	uniform mat4 mvp;
 
 	void main()
 	{
-		gl_Position = projection * view * transform * vec4(aPos, 1.0);
+		gl_Position = mvp * vec4(aPos, 1.0);
 		vertColor = aColor;
 		texCoord = aTexCoord;
 	}
@@ -35,9 +32,6 @@ namespace CBE
 	in vec2 texCoord;
 	out vec4 FragColor;
 
-	uniform mat4 transform;
-	uniform mat4 projection;
-	uniform mat4 view;
 	uniform sampler2D aTexture;
 	uniform int ticks;
 

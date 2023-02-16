@@ -126,11 +126,9 @@ namespace CBE
 	{
 		glUseProgram(modComp.model.shaderProgram->m_id);
 		
-		modComp.model.shaderProgram->UniformMatrix4fv("transform", 1, GL_FALSE, ::glm::value_ptr(trans.Matrix()));
-		modComp.model.shaderProgram->UniformMatrix4fv("projection", 1, GL_FALSE, ::glm::value_ptr(App::Instance().m_renderer->camera.ProjectionMatrix()));
-		modComp.model.shaderProgram->UniformMatrix4fv("view", 1, GL_FALSE, ::glm::value_ptr(App::Instance().m_renderer->camera.ViewMatrix()));
 		modComp.model.shaderProgram->Uniform1i("ticks", App::Instance().ticks);
-
+		glm::mat4 mvp = App::Instance().m_renderer->camera.ProjectionMatrix() * App::Instance().m_renderer->camera.ViewMatrix() * trans.Matrix();
+		modComp.model.shaderProgram->UniformMatrix4fv("mvp", 1, GL_FALSE, ::glm::value_ptr(mvp));
 
 		for (Mesh& mesh : modComp.model.meshes) 
 		{
