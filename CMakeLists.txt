@@ -60,6 +60,7 @@ file(GLOB CBE_SRC
 	${CBE_SRC_DIR}/Renderer/Renderer.cpp
 	${CBE_SRC_DIR}/Entities/Entity.cpp
 	${CBE_SRC_DIR}/Entities/Components.cpp
+	${CBE_SRC_DIR}/Input/Input.cpp
 	${CBE_SRC_DIR}/App.cpp 
 	${CBE_SRC_DIR}/main.cpp)
 
