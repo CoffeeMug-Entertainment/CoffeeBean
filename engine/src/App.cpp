@@ -1,4 +1,5 @@
 #include "App.h"
+#include "SDL_keycode.h"
 #include "entt/entity/fwd.hpp"
 #include "glad/glad.h"
 #include "spdlog/spdlog.h"
@@ -9,10 +10,13 @@
 #include "Entities/Components.h"
 #include "Entities/Entity.h"
 #include "Renderer/Model.h"
+#include "Input/Input.h"
 
 #include "glm/gtc/type_ptr.hpp"
 #include "stb_image.h"
 
+#include <SDL2/SDL_events.h>
+#include <X11/Xutil.h>
 #include <iostream>
 
 namespace CBE
@@ -90,29 +94,13 @@ namespace CBE
 		g_rectObj.Create();
 		m_entityRegistry.emplace<ModelComp>(g_rectObj.enttID, g_rect);
 
-#if 0
-		g_light.Load(modelPath);
-		Shader* vLightShader = new Shader(Shader::VERT, DEFAULT_VERT_LIGHT_SHADER_SRC, "DEFAULT_VERT_LIGHT_SHADER_SRC");
-		Shader* fLightShader = new Shader(Shader::FRAG, DEFAULT_FRAG_LIGHT_SHADER_SRC, "DEFAULT_FRAG_LIGHT_SHADER_SRC");
-
-		g_light.shaderProgram = new ShaderProgram();
-
-		vLightShader->Compile();
-		fLightShader->Compile();
-		g_light.shaderProgram->AttachVertShader(vLightShader);
-		g_light.shaderProgram->AttachFragShader(fLightShader);
-		g_light.shaderProgram->Link();
-
-		g_light.shaderProgram->Use();
-		g_rect.shaderProgram->Uniform3f("objectColor", 1.0f, 0.5f, 0.31f);
-		g_rect.shaderProgram->Uniform3f("objectColor", 1.0f, 1.0f, 1.0f);
-		glUseProgram(0);
-
-		g_lightObj.AddTransform();
-		g_lightObj.AddModel(g_light);
-
-		g_lightObj.transform->position = {1.2f, 1.0f, 2.0f};
-#endif
+		RegisterKey("quit", SDLK_ESCAPE);
+		RegisterKey("move_forward", SDLK_w);
+		RegisterKey("move_left", SDLK_a);
+		RegisterKey("move_back", SDLK_s);
+		RegisterKey("move_right", SDLK_d);
+		RegisterKey("move_up", SDLK_SPACE);
+		RegisterKey("move_down", SDLK_c);
 	}
 
 	App::~App() 
@@ -160,7 +148,24 @@ namespace CBE
 
 	void App::Update()
 	{
-
+		//TEMP(Fix): This belongs in scripting, but it'll do nicely here for now
+		if(IsPressed("quit"))
+		{
+			m_running = false;
+			return;
+		}
+		if(IsPressed("move_left"))
+			m_renderer->camera.position -= m_renderer->camera.right * deltaTime;
+		if(IsPressed("move_right"))
+			m_renderer->camera.position += m_renderer->camera.right * deltaTime;
+		if(IsPressed("move_forward"))
+			m_renderer->camera.position += m_renderer->camera.forward * deltaTime;
+		if(IsPressed("move_back"))
+			m_renderer->camera.position -= m_renderer->camera.forward * deltaTime;
+		if(IsPressed("move_up"))
+			m_renderer->camera.position += m_renderer->camera.up * deltaTime;
+		if(IsPressed("move_down"))
+			m_renderer->camera.position -= m_renderer->camera.up * deltaTime;
 	}
 	
 	int App::Loop()
@@ -173,6 +178,7 @@ namespace CBE
 			//deltaTicks = ticks - oldTicks;
 			deltaTime = (ticks - oldTicks) / 1000.0f;
 			ProcessEvents();
+			Update();
 			Render();	
 		}
 
@@ -190,40 +196,14 @@ namespace CBE
 					m_running = false;
 					break;
 				case SDL_KEYDOWN:
-					if(m_event.key.keysym.sym == SDLK_ESCAPE) {m_running = false;}
-	//TEMP(fhomolka): just a neat place to move around
-#if 1
-					switch(m_event.key.keysym.sym)
-					{
-						case SDLK_a:
-							m_renderer->camera.position -= m_renderer->camera.right * deltaTime;
-							break;
-						case SDLK_d:
-							m_renderer->camera.position += m_renderer->camera.right * deltaTime;
-							break;
-						case SDLK_w:
-							m_renderer->camera.position += m_renderer->camera.forward * deltaTime;
-							break;
-						case SDLK_s:
-							m_renderer->camera.position -= m_renderer->camera.forward * deltaTime;
-							break;
-						case SDLK_SPACE:
-							m_renderer->camera.position += m_renderer->camera.up * deltaTime;
-							break;
-						case SDLK_c:
-							m_renderer->camera.position -= m_renderer->camera.up * deltaTime;
-							break;
-						default:
-							break;
-					}
-#endif
+					[[fallthrough]];
+				case SDL_KEYUP:
+					UpdateInput(m_event.key.keysym.sym, m_event.type == SDL_KEYDOWN);
 					break;
 				case SDL_MOUSEMOTION:
 #if 1
 					mouseMovement = glm::vec2{m_event.motion.xrel, m_event.motion.yrel};
 					m_renderer->camera.MouseLook(mouseMovement,  deltaTime * 4);
-					//m_renderer->camera.target.x += mouseMovement.x * deltaTime;
-					//m_renderer->camera.target.y -= mouseMovement.y * deltaTime;
 #endif
 					break;
 				default:
