@@ -2,6 +2,8 @@
 #include "SDL_keycode.h"
 #include "entt/entity/fwd.hpp"
 #include "glad/glad.h"
+#include "glm/ext/vector_float3.hpp"
+#include "glm/fwd.hpp"
 #include "spdlog/spdlog.h"
 
 #include "Renderer/Shader.h"
@@ -13,6 +15,7 @@
 #include "Input/Input.h"
 
 #include "glm/gtc/type_ptr.hpp"
+#include <glm/gtx/rotate_vector.hpp>
 #include "stb_image.h"
 
 #include <SDL2/SDL_events.h>
@@ -101,6 +104,11 @@ namespace CBE
 		RegisterKey("move_right", SDLK_d);
 		RegisterKey("move_up", SDLK_SPACE);
 		RegisterKey("move_down", SDLK_c);
+
+		RegisterKey("cube_forward", SDLK_UP);
+		RegisterKey("cube_back", SDLK_DOWN);
+		RegisterKey("cube_left", SDLK_LEFT);
+		RegisterKey("cube_right", SDLK_RIGHT);
 	}
 
 	App::~App() 
@@ -146,6 +154,8 @@ namespace CBE
 		SDL_GL_SwapWindow(m_window);
 	}
 
+
+
 	void App::Update()
 	{
 		//TEMP(Fix): This belongs in scripting, but it'll do nicely here for now
@@ -166,6 +176,15 @@ namespace CBE
 			m_renderer->camera.position += m_renderer->camera.up * deltaTime;
 		if(IsPressed("move_down"))
 			m_renderer->camera.position -= m_renderer->camera.up * deltaTime;
+
+		if(IsPressed("cube_forward"))
+			g_rectObj.Transform().position += glm::rotateY(glm::vec3(1, 0, 0), glm::radians(g_rectObj.Transform().rotation.y)) * deltaTime;
+		if(IsPressed("cube_back"))
+			g_rectObj.Transform().position += glm::rotateY(glm::vec3(-1, 0, 0), glm::radians(g_rectObj.Transform().rotation.y)) * deltaTime;
+		if(IsPressed("cube_left"))
+			g_rectObj.Transform().rotation.y += 45 * deltaTime;
+		if(IsPressed("cube_right"))
+			g_rectObj.Transform().rotation.y -= 45 * deltaTime;
 	}
 	
 	int App::Loop()
