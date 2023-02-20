@@ -11,4 +11,9 @@ namespace CBE
 		this->enttID = App::Instance().m_entityRegistry.create();
 		App::Instance().m_entityRegistry.emplace<TransformComp>(enttID).ToDefault();
 	}	
+
+	CBE::TransformComp& Entity::Transform()
+	{
+		return App::Instance().m_entityRegistry.get<TransformComp>(enttID);
+	}
 }
