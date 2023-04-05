@@ -29,6 +29,9 @@ namespace CBE
 	Model g_rect;
 	Entity g_rectObj;
 
+	Model mapModel;
+	Entity mapEntity;
+
 #if 0
 	Model g_light;
 	Entity g_lightObj;
@@ -96,6 +99,15 @@ namespace CBE
 
 		g_rectObj.Create();
 		m_entityRegistry.emplace<ModelComp>(g_rectObj.enttID, g_rect);
+
+
+		modelPath = "unnamed.obj";
+		mapModel.Load(modelPath);
+
+		mapModel.shaderProgram = g_rect.shaderProgram;
+
+		mapEntity.Create();
+		m_entityRegistry.emplace<ModelComp>(mapEntity.enttID, mapModel);
 
 		RegisterKey("quit", SDLK_ESCAPE);
 		RegisterKey("move_forward", SDLK_w);
