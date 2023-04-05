@@ -198,7 +198,7 @@ namespace CBE
 	
 	int App::Loop()
 	{
-		m_renderer->SetClearColor({0.75f, 1.0f, 0.93f, 1.0f});
+		m_renderer->SetClearColor({0.21f, 0.21f, 0.21f, 1.0f});
 		while(m_running)
 		{
 			oldTicks = ticks;
