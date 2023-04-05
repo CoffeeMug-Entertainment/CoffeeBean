@@ -104,6 +104,7 @@ namespace CBE
 		RegisterKey("move_right", SDLK_d);
 		RegisterKey("move_up", SDLK_SPACE);
 		RegisterKey("move_down", SDLK_c);
+		RegisterKey("move_fast", SDLK_f);
 
 		RegisterKey("cube_forward", SDLK_UP);
 		RegisterKey("cube_back", SDLK_DOWN);
@@ -164,18 +165,26 @@ namespace CBE
 			m_running = false;
 			return;
 		}
+
+		static float speed = 1.0f;
+
+		if(IsPressed("move_fast")) 
+			speed = 16.0f;
+		else
+			speed = 1.0f;
+
 		if(IsPressed("move_left"))
-			m_renderer->camera.position -= m_renderer->camera.right * deltaTime;
+			m_renderer->camera.position -= m_renderer->camera.right * deltaTime * speed;
 		if(IsPressed("move_right"))
-			m_renderer->camera.position += m_renderer->camera.right * deltaTime;
+			m_renderer->camera.position += m_renderer->camera.right * deltaTime * speed;
 		if(IsPressed("move_forward"))
-			m_renderer->camera.position += m_renderer->camera.forward * deltaTime;
+			m_renderer->camera.position += m_renderer->camera.forward * deltaTime * speed;
 		if(IsPressed("move_back"))
-			m_renderer->camera.position -= m_renderer->camera.forward * deltaTime;
+			m_renderer->camera.position -= m_renderer->camera.forward * deltaTime * speed;
 		if(IsPressed("move_up"))
-			m_renderer->camera.position += m_renderer->camera.up * deltaTime;
+			m_renderer->camera.position += m_renderer->camera.up * deltaTime * speed;
 		if(IsPressed("move_down"))
-			m_renderer->camera.position -= m_renderer->camera.up * deltaTime;
+			m_renderer->camera.position -= m_renderer->camera.up * deltaTime * speed;
 
 		if(IsPressed("cube_forward"))
 			g_rectObj.Transform().position += glm::rotateY(glm::vec3(1, 0, 0), glm::radians(g_rectObj.Transform().rotation.y)) * deltaTime;
