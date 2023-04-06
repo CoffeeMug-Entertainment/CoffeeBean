@@ -42,3 +42,8 @@
 * Version: 3.11.1
 * License: MIT
 * Acquired from: https://github.com/skypjack/entt/releases/tag/v3.11.1
+
+## simdjson
+* Version: 3.1.6
+* License Apache-2.0 License
+* Acquired from: https://github.com/simdjson/simdjson/releases/tag/v3.1.6
