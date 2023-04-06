@@ -51,6 +51,11 @@ add_subdirectory(${ASI_DIR})
 set(ENTT_DIR engine/thirdparty/EnTT)
 add_subdirectory(${ENTT_DIR})
 
+# simdjson
+set(SIMDJSON_DIR engine/thirdparty/simdjson)
+set(SIMDJSON_INC_DIR ${SIMDJSON_DIR})
+file(GLOB SIMDJSON_SRC ${SIMDJSON_DIR}/simdjson.cpp)
+
 set(CBE_SRC_DIR engine/src)
 file(GLOB CBE_SRC 
 	${CBE_SRC_DIR}/header_impl.cpp
@@ -72,14 +77,15 @@ add_definitions("-Wall -pedantic")
 ELSEIF(UNIX)
 add_definitions("-Wall -Wextra -pedantic")
 ENDIF()
-add_executable(${PROJECT_NAME} ${CBE_SRC} ${GLAD_SRC})
+add_executable(${PROJECT_NAME} ${CBE_SRC} ${GLAD_SRC} ${SIMDJSON_SRC})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CBE_SRC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SPDLOG_INC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SDL_INC_DIR})
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${GLAD_INC_DIR})
-target_include_directories(${PROJECT_NAME} PUBLIC ${GLM_INC_DIR})
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${GLM_INC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${STB_INC_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${SIMDJSON_INC_DIR})
 
 IF(WIN32)
 	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2-static SDL2::SDL2main assimp EnTT::EnTT)
