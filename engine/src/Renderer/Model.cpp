@@ -61,7 +61,6 @@ namespace CBE
 			aiString texPath;
 			scene->mMaterials[mesh->mMaterialIndex]->GetTexture(aiTextureType_DIFFUSE, 0,  &texPath);
 			std::string texPathStr = std::string(texPath.C_Str());
-			spdlog::info("Texture path: {}", texPathStr);
 			unsigned char* data = newTex->Load(texPathStr);
 			if (!data) 
 			{

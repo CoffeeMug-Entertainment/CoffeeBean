@@ -15,7 +15,7 @@ namespace CBE
 		unsigned char* tex_data = stbi_load(filePath.c_str(), &width, &height, &comps, 0);
 		if (!tex_data) 
 		{
-			spdlog::error("Failed to load {}\n\t Reason: {}", filePath, stbi_failure_reason());
+			spdlog::error("Failed to load texture: {}\n\t Reason: {}", filePath, stbi_failure_reason());
 			return nullptr;
 		}
 
