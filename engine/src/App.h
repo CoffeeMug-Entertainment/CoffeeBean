@@ -28,6 +28,8 @@ namespace CBE
 			SDL_Window* m_window;
 			entt::registry m_entityRegistry;
 
+			void LoadScene(std::string&& filePath);
+
 		private:
 
 			static App* s_instance;

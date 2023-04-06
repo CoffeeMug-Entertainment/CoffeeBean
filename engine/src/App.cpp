@@ -15,12 +15,16 @@
 #include "Input/Input.h"
 
 #include "glm/gtc/type_ptr.hpp"
+#include <cstdint>
 #include <glm/gtx/rotate_vector.hpp>
 #include "stb_image.h"
+
+#include "simdjson.h"
 
 #include <SDL2/SDL_events.h>
 #include <X11/Xutil.h>
 #include <iostream>
+#include <string_view>
 
 namespace CBE
 {
@@ -31,6 +35,8 @@ namespace CBE
 
 	Model mapModel;
 	Entity mapEntity;
+
+	ShaderProgram *DefaultShaderProgram;
 
 #if 0
 	Model g_light;
@@ -77,20 +83,21 @@ namespace CBE
 		//TEMP(fix): Just to mess around with OpenGL
 		stbi_set_flip_vertically_on_load(true);
 
-		std::string modelPath = "box.obj";
-		g_rect.Load(modelPath);
-
-		g_rect.shaderProgram = new ShaderProgram();
-
+		DefaultShaderProgram = new ShaderProgram();
 		Shader* vShader = new Shader(Shader::VERT, DEFAULT_VERT_SHADER_SRC, "DEFAULT_VERT_SHADER_SRC");
 		Shader* fShader = new Shader(Shader::FRAG, DEFAULT_FRAG_SHADER_SRC, "DEFAULT_FRAG_SHADER_SRC");
 
 		vShader->Compile();
 		fShader->Compile();
 
-		g_rect.shaderProgram->AttachVertShader(vShader);
-		g_rect.shaderProgram->AttachFragShader(fShader);
-		g_rect.shaderProgram->Link();
+		DefaultShaderProgram->AttachVertShader(vShader);
+		DefaultShaderProgram->AttachFragShader(fShader);
+		DefaultShaderProgram->Link();
+
+		std::string modelPath = "box.obj";
+		g_rect.Load(modelPath);
+
+		g_rect.shaderProgram = DefaultShaderProgram;
 
 		glUseProgram(g_rect.shaderProgram->m_id);
 		g_rect.shaderProgram->Uniform1i("aTexture", 0);
@@ -99,15 +106,6 @@ namespace CBE
 
 		g_rectObj.Create();
 		m_entityRegistry.emplace<ModelComp>(g_rectObj.enttID, g_rect);
-
-
-		modelPath = "unnamed.obj";
-		mapModel.Load(modelPath);
-
-		mapModel.shaderProgram = g_rect.shaderProgram;
-
-		mapEntity.Create();
-		m_entityRegistry.emplace<ModelComp>(mapEntity.enttID, mapModel);
 
 		RegisterKey("quit", SDLK_ESCAPE);
 		RegisterKey("move_forward", SDLK_w);
@@ -122,6 +120,21 @@ namespace CBE
 		RegisterKey("cube_back", SDLK_DOWN);
 		RegisterKey("cube_left", SDLK_LEFT);
 		RegisterKey("cube_right", SDLK_RIGHT);
+
+		RegisterKey("load_scene", SDLK_r);
+		RegisterKey("Add_map", SDLK_k);
+	}
+
+	void AddBox()
+	{
+
+		std::string modelPath = "unnamed.obj";
+		mapModel.Load(modelPath);
+
+		mapModel.shaderProgram = DefaultShaderProgram;
+
+		mapEntity.Create();
+		App::Instance().m_entityRegistry.emplace<ModelComp>(mapEntity.enttID, mapModel);
 	}
 
 	App::~App() 
@@ -168,7 +181,6 @@ namespace CBE
 	}
 
 
-
 	void App::Update()
 	{
 		//TEMP(Fix): This belongs in scripting, but it'll do nicely here for now
@@ -176,6 +188,16 @@ namespace CBE
 		{
 			m_running = false;
 			return;
+		}
+
+		if(IsPressed("load_scene"))
+		{
+			LoadScene("scene.json");
+		}
+
+		if(IsPressed("Add_map"))
+		{
+			AddBox();
 		}
 
 		static float speed = 1.0f;
@@ -210,6 +232,7 @@ namespace CBE
 	
 	int App::Loop()
 	{
+		//TEMP(fix): load the temp scene
 		m_renderer->SetClearColor({0.21f, 0.21f, 0.21f, 1.0f});
 		while(m_running)
 		{
@@ -251,4 +274,51 @@ namespace CBE
 			}
 		}
 	}
+
+	void App::LoadScene(std::string &&filePath)
+	{
+		static simdjson::ondemand::parser parser;
+		simdjson::padded_string loadedJsonString = simdjson::padded_string::load(filePath);
+		simdjson::ondemand::document sceneJson = parser.iterate(loadedJsonString);
+
+		m_entityRegistry.clear();
+
+		unsigned int entityCount = sceneJson["entities"].get_uint64();
+		spdlog::info("Loaded scene has {} entities", entityCount);
+
+		for(uint64_t i = 0; i < entityCount; ++i)
+		{
+			entt::entity new_entity = m_entityRegistry.create();
+			m_entityRegistry.emplace<TransformComp>(new_entity).ToDefault();
+			auto comps = sceneJson["components"].get_array();
+
+			for(simdjson::ondemand::object elem : comps)
+			{
+				auto trans = elem["transform"];
+				TransformComp transComp = m_entityRegistry.get<TransformComp>(new_entity);
+
+				transComp.position.x = trans["position_x"].get_double();
+				transComp.position.y = trans["position_y"].get_double();
+				transComp.position.z = trans["position_z"].get_double();
+				transComp.rotation.x = trans["rotation_x"].get_double();
+				transComp.rotation.y = trans["rotation_y"].get_double();
+				transComp.rotation.z = trans["rotation_z"].get_double();
+				transComp.scale.x = trans["scale_x"].get_double();
+				transComp.scale.y = trans["scale_y"].get_double();
+				transComp.scale.z = trans["scale_z"].get_double();
+
+				auto model = elem["model"].get_string();
+				Model aldi;
+					
+				std::string temp = std::string(model.value().data(), model.value().size());
+				aldi.Load(temp);
+
+				aldi.shaderProgram = DefaultShaderProgram;
+				ModelComp af = m_entityRegistry.emplace<ModelComp>(new_entity, aldi);
+			}
+		}
+
+		m_renderer->camera.ToDefault();
+	}
 }
+
