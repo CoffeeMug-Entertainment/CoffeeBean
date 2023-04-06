@@ -1,4 +1,6 @@
 #include "App.h"
+#include "config.h"
+
 #include "SDL_keycode.h"
 #include "entt/entity/fwd.hpp"
 #include "glad/glad.h"
@@ -94,7 +96,7 @@ namespace CBE
 		DefaultShaderProgram->AttachFragShader(fShader);
 		DefaultShaderProgram->Link();
 
-		std::string modelPath = "box.obj";
+		std::string modelPath = GAME_DIR"/models/box/box.obj";
 		g_rect.Load(modelPath);
 
 		g_rect.shaderProgram = DefaultShaderProgram;
@@ -121,14 +123,15 @@ namespace CBE
 		RegisterKey("cube_left", SDLK_LEFT);
 		RegisterKey("cube_right", SDLK_RIGHT);
 
-		RegisterKey("load_scene", SDLK_r);
+		RegisterKey("load_scene1", SDLK_KP_1);
+		RegisterKey("load_scene2", SDLK_KP_2);
 		RegisterKey("Add_map", SDLK_k);
 	}
 
 	void AddBox()
 	{
 
-		std::string modelPath = "unnamed.obj";
+		std::string modelPath = GAME_DIR"/unnamed/unnamed.obj";
 		mapModel.Load(modelPath);
 
 		mapModel.shaderProgram = DefaultShaderProgram;
@@ -190,9 +193,14 @@ namespace CBE
 			return;
 		}
 
-		if(IsPressed("load_scene"))
+		if(IsPressed("load_scene1"))
 		{
-			LoadScene("scene.json");
+			LoadScene(GAME_DIR"/scenes/scene01.json");
+		}
+
+		if(IsPressed("load_scene2"))
+		{
+			LoadScene(GAME_DIR"/scenes/scene02.json");
 		}
 
 		if(IsPressed("Add_map"))
@@ -310,7 +318,7 @@ namespace CBE
 				auto model = elem["model"].get_string();
 				Model aldi;
 					
-				std::string temp = std::string(model.value().data(), model.value().size());
+				std::string temp = GAME_DIR "/" + std::string(model.value().data(), model.value().size());
 				aldi.Load(temp);
 
 				aldi.shaderProgram = DefaultShaderProgram;
