@@ -131,7 +131,7 @@ namespace CBE
 	void AddBox()
 	{
 
-		std::string modelPath = GAME_DIR"/unnamed/unnamed.obj";
+		std::string modelPath = GAME_DIR"/models/unnamed/unnamed.obj";
 		mapModel.Load(modelPath);
 
 		mapModel.shaderProgram = DefaultShaderProgram;
