@@ -125,6 +125,7 @@ namespace CBE
 
 		RegisterKey("load_scene1", SDLK_KP_1);
 		RegisterKey("load_scene2", SDLK_KP_2);
+		RegisterKey("load_scene3", SDLK_KP_3);
 		RegisterKey("Add_map", SDLK_k);
 	}
 
@@ -201,6 +202,11 @@ namespace CBE
 		if(IsPressed("load_scene2"))
 		{
 			LoadScene(GAME_DIR"/scenes/scene02.json");
+		}
+
+		if(IsPressed("load_scene3"))
+		{
+			LoadScene(GAME_DIR"/scenes/scene03.json");
 		}
 
 		if(IsPressed("Add_map"))

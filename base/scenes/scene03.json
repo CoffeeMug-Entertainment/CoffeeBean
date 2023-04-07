@@ -1,0 +1,36 @@
+{
+	"entities": 1,
+	"components":
+	[
+		{
+			"transform":
+			{
+				"position_x": 0.0,
+				"position_y": 0.0,
+				"position_z": 0.0,
+				"rotation_x": 0.0,
+				"rotation_y": 0.0,
+				"rotation_z": 0.0,
+				"scale_x": 1.0,
+				"scale_y": 1.0,
+				"scale_z": 1.0
+			},
+			"model": "models/unnamed/unnamed.obj"
+		},
+		{
+			"transform": 
+			{
+				"position_x": 0.0,
+				"position_y": 0.0,
+				"position_z": 0.0,
+				"rotation_x": 0.0,
+				"rotation_y": 0.0,
+				"rotation_z": 0.0,
+				"scale_x": 1.0,
+				"scale_y": 1.0,
+				"scale_z": 1.0
+			},
+			"model": "models/box/box.obj"
+		}
+	]
+}
