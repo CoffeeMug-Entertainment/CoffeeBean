@@ -294,36 +294,34 @@ namespace CBE
 		unsigned int entityCount = sceneJson["entities"].get_uint64();
 		spdlog::info("Loaded scene has {} entities", entityCount);
 
-		for(uint64_t i = 0; i < entityCount; ++i)
+		auto comps = sceneJson["components"].get_array();
+
+		for(simdjson::ondemand::object elem : comps)
 		{
 			entt::entity new_entity = m_entityRegistry.create();
 			m_entityRegistry.emplace<TransformComp>(new_entity).ToDefault();
-			auto comps = sceneJson["components"].get_array();
 
-			for(simdjson::ondemand::object elem : comps)
-			{
-				auto trans = elem["transform"];
-				TransformComp transComp = m_entityRegistry.get<TransformComp>(new_entity);
+			auto trans = elem["transform"];
+			TransformComp& transComp = m_entityRegistry.get<TransformComp>(new_entity);
 
-				transComp.position.x = trans["position_x"].get_double();
-				transComp.position.y = trans["position_y"].get_double();
-				transComp.position.z = trans["position_z"].get_double();
-				transComp.rotation.x = trans["rotation_x"].get_double();
-				transComp.rotation.y = trans["rotation_y"].get_double();
-				transComp.rotation.z = trans["rotation_z"].get_double();
-				transComp.scale.x = trans["scale_x"].get_double();
-				transComp.scale.y = trans["scale_y"].get_double();
-				transComp.scale.z = trans["scale_z"].get_double();
+			transComp.position.x = trans["position_x"].get_double();
+			transComp.position.y = trans["position_y"].get_double();
+			transComp.position.z = trans["position_z"].get_double();
+			transComp.rotation.x = trans["rotation_x"].get_double();
+			transComp.rotation.y = trans["rotation_y"].get_double();
+			transComp.rotation.z = trans["rotation_z"].get_double();
+			transComp.scale.x = trans["scale_x"].get_double();
+			transComp.scale.y = trans["scale_y"].get_double();
+			transComp.scale.z = trans["scale_z"].get_double();
 
-				auto model = elem["model"].get_string();
-				Model aldi;
-					
-				std::string temp = GAME_DIR "/" + std::string(model.value().data(), model.value().size());
-				aldi.Load(temp);
+			auto model = elem["model"].get_string();
+			Model aldi;
+				
+			std::string temp = GAME_DIR "/" + std::string(model.value().data(), model.value().size());
+			aldi.Load(temp);
 
-				aldi.shaderProgram = DefaultShaderProgram;
-				ModelComp af = m_entityRegistry.emplace<ModelComp>(new_entity, aldi);
-			}
+			aldi.shaderProgram = DefaultShaderProgram;
+			ModelComp af = m_entityRegistry.emplace<ModelComp>(new_entity, aldi);
 		}
 
 		m_renderer->camera.ToDefault();
