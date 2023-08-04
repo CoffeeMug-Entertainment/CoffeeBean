@@ -39,7 +39,7 @@ namespace CBE
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		//fmt::print("\nOpenGL Info:\n\tVendor: {}\n\tRenderer: {}\n\tVersion: {}", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
+		fmt::print("OpenGL Info:\n\tVendor: {}\n\tRenderer: {}\n\tVersion: {}\n", (char*)glGetString(GL_VENDOR), (char*)glGetString(GL_RENDERER), (char*)glGetString(GL_VERSION));
 	}
 	
 	Renderer::~Renderer()
