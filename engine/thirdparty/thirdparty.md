@@ -12,11 +12,11 @@
 * License: ???
 * Acquired from (generated): https://glad.dav1d.de
 
-## spdlog
+## {fmt}
 
-* Version: 1.10.0
+* Version: 10.0.0
 * License: MIT
-* Acquired from: https://github.com/gabime/spdlog/releases/tag/v1.10.0
+* Acquired from: https://github.com/fmtlib/fmt/releases/tag/10.0.0
 
 ## glm
 

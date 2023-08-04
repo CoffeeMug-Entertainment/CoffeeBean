@@ -17,12 +17,10 @@ IF(UNIX)
 set(GLAD_LDFLAGS GL)
 ENDIF()
 
-# spdlog
-set(SPDLOG_DIR engine/thirdparty/spdlog)
-set(SPDLOG_INC_DIR ${SPDLOG_DIR}/include)
-set(BUILD_SHARED_LIBS OFF)
-set(SPDLOG_BUILD_SHARED OFF)
-add_subdirectory(${SPDLOG_DIR})
+# fmt
+set(FMT_DIR engine/thirdparty/fmt)
+set(FMT_INC_DIR ${FMT_DIR}/include)
+add_subdirectory(${FMT_DIR})
 
 # glm
 set(GLM_DIR engine/thirdparty/glm)
@@ -62,6 +60,7 @@ file(GLOB SIMDJSON_SRC ${SIMDJSON_DIR}/simdjson.cpp)
 set(CBE_SRC_DIR engine/src)
 file(GLOB CBE_SRC 
 	${CBE_SRC_DIR}/header_impl.cpp
+	${CBE_SRC_DIR}/Importers/ObjImporter.cpp
 	${CBE_SRC_DIR}/Renderer/Texture.cpp
 	${CBE_SRC_DIR}/Renderer/Shader.cpp
 	${CBE_SRC_DIR}/Renderer/Buffers.cpp
@@ -83,7 +82,7 @@ ENDIF()
 add_executable(${PROJECT_NAME} ${CBE_SRC} ${GLAD_SRC} ${SIMDJSON_SRC})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CBE_SRC_DIR})
-target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${SPDLOG_INC_DIR})
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${FMT_INC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SDL_INC_DIR})
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${GLAD_INC_DIR})
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${GLM_INC_DIR})
@@ -91,9 +90,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${STB_INC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SIMDJSON_INC_DIR})
 
 IF(WIN32)
-	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2-static SDL2::SDL2main assimp EnTT::EnTT)
+	set(CBE_LDFLAGS fmt::fmt SDL2::SDL2-static SDL2::SDL2main assimp EnTT::EnTT)
 ELSEIF(UNIX)
-	set(CBE_LDFLAGS spdlog::spdlog SDL2::SDL2-static assimp::assimp EnTT::EnTT m pthread dl -static-libgcc -static-libstdc++)
+	set(CBE_LDFLAGS fmt::fmt SDL2::SDL2-static assimp::assimp EnTT::EnTT m pthread dl -static-libgcc -static-libstdc++)
 ENDIF()
 
 target_link_libraries(${PROJECT_NAME} ${CBE_LDFLAGS})

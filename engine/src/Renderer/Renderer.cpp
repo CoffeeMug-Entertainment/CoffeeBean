@@ -1,6 +1,6 @@
 #include "Renderer.h"
 #include "glad/glad.h"
-#include "spdlog/spdlog.h"
+#include "fmt/core.h"
 
 namespace CBE
 {
@@ -16,7 +16,7 @@ namespace CBE
 		
 		if(m_context == 0)
 		{
-			spdlog::error("Failed to make OpenGL context!\n\t{}", SDL_GetError());
+			fmt::print("Failed to make OpenGL context!\n\t{}", SDL_GetError());
 			exit(-3);
 		}
 
@@ -26,7 +26,7 @@ namespace CBE
 
 		if(!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
 		{
-			spdlog::error("Failed to initialise GLAD!\n");
+			fmt::print("Failed to initialise GLAD!\n");
 			exit(-4);
 		}
 		
@@ -39,7 +39,7 @@ namespace CBE
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		spdlog::info("\nOpenGL Info:\n\tVendor: {}\n\tRenderer: {}\n\tVersion: {}", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
+		//fmt::print("\nOpenGL Info:\n\tVendor: {}\n\tRenderer: {}\n\tVersion: {}", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION));
 	}
 	
 	Renderer::~Renderer()
