@@ -2,7 +2,6 @@ build
 .cache
 
 *.o
-*.obj
 *.exe
 *.bin
 *.x86
