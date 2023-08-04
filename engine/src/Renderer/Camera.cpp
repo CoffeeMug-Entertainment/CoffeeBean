@@ -2,7 +2,6 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-#include "spdlog/spdlog.h"
 #include "App.h"
 #include "SDL_opengl.h"
 

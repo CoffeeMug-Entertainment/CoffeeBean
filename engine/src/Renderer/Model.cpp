@@ -5,9 +5,8 @@
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
-#include "spdlog/spdlog.h"
 #include "stb_image.h"
-
+#include "fmt/core.h"
 #include <filesystem>
 
 namespace CBE
@@ -117,13 +116,13 @@ namespace CBE
 
 	void Model::Load(std::string& path)
 	{
-		spdlog::info("Importing model from path {}\n", path);
+		fmt::print("Importing model from path {}\n", path);
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
 		if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
-			spdlog::error("Assimp failed to import file {}\n\tReason: {}", path, importer.GetErrorString());
+			fmt::print("Assimp failed to import file {}\n\tReason: {}", path, importer.GetErrorString());
 		}
 		
 		ProcessNode(*this, scene->mRootNode, scene, path);

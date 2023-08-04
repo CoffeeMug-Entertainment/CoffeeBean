@@ -1,4 +1,5 @@
 #include "App.h"
+#include "Renderer/Camera.h"
 #include "config.h"
 
 #include "SDL_keycode.h"
@@ -6,7 +7,6 @@
 #include "glad/glad.h"
 #include "glm/ext/vector_float3.hpp"
 #include "glm/fwd.hpp"
-#include "spdlog/spdlog.h"
 
 #include "Renderer/Shader.h"
 #include "Renderer/DefaultShaders.h"
@@ -18,6 +18,7 @@
 
 #include "glm/gtc/type_ptr.hpp"
 #include <cstdint>
+#include <fmt/core.h>
 #include <glm/gtx/rotate_vector.hpp>
 #include "stb_image.h"
 
@@ -51,7 +52,7 @@ namespace CBE
 	App::App() 
 	{
 		if (s_instance) {
-			spdlog::error("App instance already exits!");
+			fmt::print("App instance already exits!");
 			return;
 		}
 
@@ -59,7 +60,7 @@ namespace CBE
 
 
 		if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-			spdlog::error("Failed to init SDL!\n\t{}", SDL_GetError());
+			fmt::print("Failed to init SDL!\n\t{}", SDL_GetError());
 			exit(-1);
 		}
 
@@ -71,7 +72,7 @@ namespace CBE
 									SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
 
 		if (m_window == nullptr) {
-			spdlog::error("Failed to make window!\n\t{}", SDL_GetError());
+			fmt::print("Failed to make window!\n\t{}", SDL_GetError());
 			exit(-2);
 		}
 
@@ -127,6 +128,9 @@ namespace CBE
 		RegisterKey("load_scene2", SDLK_KP_2);
 		RegisterKey("load_scene3", SDLK_KP_3);
 		RegisterKey("Add_map", SDLK_k);
+
+		//HACK(fhomolka): There's a weird snap when the user first moves the mouse, this is here to fix that.
+		m_renderer->camera.MouseLook({0.0f, 0.0f}, 0);
 	}
 
 	void AddBox()
@@ -298,7 +302,7 @@ namespace CBE
 		m_entityRegistry.clear();
 
 		unsigned int entityCount = sceneJson["entities"].get_uint64();
-		spdlog::info("Loaded scene has {} entities", entityCount);
+		fmt::print("Loaded scene has {} entities", entityCount);
 
 		auto comps = sceneJson["components"].get_array();
 

@@ -1,6 +1,6 @@
 #include "Texture.h"
 #include "stb_image.h"
-#include "spdlog/spdlog.h"
+#include "fmt/core.h"
 
 namespace CBE
 {
@@ -15,7 +15,7 @@ namespace CBE
 		unsigned char* tex_data = stbi_load(filePath.c_str(), &width, &height, &comps, 0);
 		if (!tex_data) 
 		{
-			spdlog::error("Failed to load texture: {}\n\t Reason: {}", filePath, stbi_failure_reason());
+			fmt::print("Failed to load texture: {}\n\t Reason: {}", filePath, stbi_failure_reason());
 			return nullptr;
 		}
 
@@ -44,7 +44,7 @@ namespace CBE
 				gl_format = GL_RGB;
 				break;
 			default:
-				spdlog::warn("Image format not yet implemented, assuming GL_RGB! comps: {}", comps);
+				fmt::print("Image format not yet implemented, assuming GL_RGB! comps: {}", comps);
 				gl_format = GL_RGB;
 				break;
 		}

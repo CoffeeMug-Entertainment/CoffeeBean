@@ -1,7 +1,7 @@
 #include "App.h"
 
 #include "Shader.h"
-#include "spdlog/spdlog.h"
+#include "fmt/core.h"
 
 namespace CBE
 {
@@ -20,7 +20,7 @@ namespace CBE
 				break;
 			case NONE:
 			default:
-				spdlog::error("Invalid shader type!");
+				fmt::print("Invalid shader type!");
 				break;
 		}
 		const char* shader_src_c_str = source.c_str();
@@ -42,7 +42,7 @@ namespace CBE
 		if(!success)
 		{
 			glGetShaderInfoLog(id, 512, NULL, infolog);
-			spdlog::error("Failed to compile Shader {}! Reason: {}", fileName, infolog);
+			fmt::print("Failed to compile Shader {}! Reason: {}", fileName, infolog);
 		}
 	}
 
@@ -77,7 +77,7 @@ namespace CBE
 		{
 			char infolog[512];
 			glGetProgramInfoLog(m_id, 512, NULL, infolog);
-			spdlog::error("Failed to link {} and {}. Reason:", m_vertShader->fileName, m_fragShader->fileName, infolog);
+			fmt::print("Failed to link {} and {}. Reason:", m_vertShader->fileName, m_fragShader->fileName, infolog);
 		}
 	}
 
