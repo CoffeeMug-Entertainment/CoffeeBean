@@ -8,6 +8,8 @@
 #include "spdlog/spdlog.h"
 #include "stb_image.h"
 
+#include <filesystem>
+
 namespace CBE
 {
 	void Model::Draw()
@@ -26,7 +28,7 @@ namespace CBE
 		glUseProgram(0);
 	}
 
-	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene)
+	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene, std::string& path)
 	{
 		Mesh newMesh;
 
@@ -61,7 +63,13 @@ namespace CBE
 			aiString texPath;
 			scene->mMaterials[mesh->mMaterialIndex]->GetTexture(aiTextureType_DIFFUSE, 0,  &texPath);
 			std::string texPathStr = std::string(texPath.C_Str());
-			unsigned char* data = newTex->Load(texPathStr);
+
+			//HACK(fhomolka): On some system, stb_image expects an ABSOLUTE path. For now, i did ugly nonsense.
+			std::filesystem::path mdlPath = std::filesystem::path(path);
+			std::string texDir = mdlPath.parent_path().string();
+			std::string fullTexDirStr = texDir + "/" + texPathStr;
+
+			unsigned char* data = newTex->Load(fullTexDirStr);
 			if (!data) 
 			{
 				newTex->width = MISSING_TEX.width;
@@ -91,24 +99,25 @@ namespace CBE
 		return newMesh;
 	}
 
-	void ProcessNode(Model& mdl, aiNode* node, const aiScene* scene)
+	void ProcessNode(Model& mdl, aiNode* node, const aiScene* scene, std::string& path)
 	{
 		for(unsigned int i = 0; i < node->mNumMeshes; ++i)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			CBE::Mesh tempMesh = ProcessMesh(mesh, scene);
+			CBE::Mesh tempMesh = ProcessMesh(mesh, scene, path);
 			tempMesh.Setup();
 			mdl.meshes.emplace_back(tempMesh);
 		}
 
 		for(unsigned int i = 0; i < node->mNumChildren; ++i)
 		{
-			ProcessNode(mdl, node->mChildren[i], scene);
+			ProcessNode(mdl, node->mChildren[i], scene, path);
 		}
 	}
 
 	void Model::Load(std::string& path)
 	{
+		spdlog::info("Importing model from path {}\n", path);
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
@@ -117,6 +126,6 @@ namespace CBE
 			spdlog::error("Assimp failed to import file {}\n\tReason: {}", path, importer.GetErrorString());
 		}
 		
-		ProcessNode(*this, scene->mRootNode, scene);
+		ProcessNode(*this, scene->mRootNode, scene, path);
 	}
 }
