@@ -108,8 +108,6 @@ namespace CBE
 		for(unsigned int i = 0; i < tempVertices.size(); ++i)
 		{
 			mesh.EmplaceVertex(tempVertices[i], tempNormals[i], tempUVs[i]);
-			Vertex nuVertex = {tempVertices[i], glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec2{0.0f, 0.0f}, glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}};
-			mesh.vertices.emplace_back(nuVertex);
 		}
 #if 0 //This is what seems to be done a lot of times, but still not quite right
 		for (unsigned int i = 0; i < vertexIndices.size(); ++i)
