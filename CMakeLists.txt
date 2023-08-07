@@ -63,6 +63,7 @@ file(GLOB CBE_SRC
 	${CBE_SRC_DIR}/header_impl.cpp
 	${CBE_SRC_DIR}/Importers/ObjImporter.cpp
 	${CBE_SRC_DIR}/Renderer/Texture.cpp
+	${CBE_SRC_DIR}/Renderer/Material.cpp
 	${CBE_SRC_DIR}/Renderer/Shader.cpp
 	${CBE_SRC_DIR}/Renderer/Buffers.cpp
 	${CBE_SRC_DIR}/Renderer/Mesh.cpp
