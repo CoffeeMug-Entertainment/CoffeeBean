@@ -1,5 +1,6 @@
 #include "App.h"
 #include "Renderer/Camera.h"
+#include "Renderer/Texture.h"
 #include "config.h"
 
 #include "SDL_keycode.h"
@@ -112,6 +113,8 @@ namespace CBE
 		//HACK(fhomolka): There's a weird snap when the user first moves the mouse, this is here to fix that.
 		m_renderer->camera.MouseLook({0.0f, 0.0f}, 0);
 		LoadScene(GAME_DIR"/scenes/scene01.json");
+
+		MISSING_TEX.PushToGPU();
 	}
 
 	App::~App() 
@@ -132,7 +135,7 @@ namespace CBE
 		for (Mesh& mesh : modComp.model.meshes) 
 		{
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, mesh.texture->id);
+			glBindTexture(GL_TEXTURE_2D, mesh.material->diffuse_map->id);
 			mesh.vao.Bind();
 			glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);
 			mesh.vao.Unbind();
@@ -257,7 +260,6 @@ namespace CBE
 		m_entityRegistry.clear();
 
 		unsigned int entityCount = sceneJson["entities"].get_uint64();
-		fmt::print("Loaded scene has {} entities", entityCount);
 
 		auto comps = sceneJson["components"].get_array();
 

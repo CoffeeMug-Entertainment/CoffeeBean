@@ -1,5 +1,6 @@
 #include "Model.h"
 #include "Renderer/Mesh.h"
+#include "Renderer/Texture.h"
 #include "Shader.h"
 #include "App.h"
 
@@ -72,20 +73,7 @@ namespace CBE
 			std::string texDir = mdlPath.parent_path().string();
 			std::string fullTexDirStr = texDir + "/" + texPathStr;
 
-			unsigned char* data = newTex->Load(fullTexDirStr);
-			if (!data) 
-			{
-				newTex->width = MISSING_TEX.width;
-				newTex->height = MISSING_TEX.height;
-				newTex->comps = MISSING_TEX.comps;
-   				newTex->PushToGPU(MISSING_TEX_DATA);
-			}
-			else
-			{
-				newTex->PushToGPU(data);
-			}
-			stbi_image_free(data);
-
+			newTex->Load(fullTexDirStr);
 		}
 		else
 		{
@@ -93,12 +81,10 @@ namespace CBE
 			newTex->width = MISSING_TEX.width;
 			newTex->height = MISSING_TEX.height;
 			newTex->comps = MISSING_TEX.comps;
-			newTex->PushToGPU(MISSING_TEX_DATA);
+			newTex->data = MISSING_TEX_DATA;
+			newTex->PushToGPU();
 			
 		}
-
-		newMesh.texture = newTex;
-
 
 		return newMesh;
 	}
@@ -126,14 +112,6 @@ namespace CBE
 		if(LoadMeshFromOBJ(path, tempMesh)) 
 		{
 			tempMesh.Setup();
-			Texture* newTex = new Texture();
-			newTex->width = MISSING_TEX.width;
-			newTex->height = MISSING_TEX.height;
-			newTex->comps = MISSING_TEX.comps;
-			newTex->PushToGPU(MISSING_TEX_DATA);
-
-			tempMesh.texture = newTex;
-
 			this->meshes.emplace_back(tempMesh);
 		}
 		else 
