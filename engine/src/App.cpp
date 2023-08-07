@@ -33,12 +33,6 @@ namespace CBE
 {
 	//TEMP(Fix): Just to draw something in the world
 	//Model g_triangle;
-	Model g_rect;
-	Entity g_rectObj;
-
-	Model mapModel;
-	Entity mapEntity;
-
 	ShaderProgram *DefaultShaderProgram;
 
 #if 0
@@ -97,19 +91,6 @@ namespace CBE
 		DefaultShaderProgram->AttachFragShader(fShader);
 		DefaultShaderProgram->Link();
 
-		std::string modelPath = GAME_DIR"/models/box/box.obj";
-		g_rect.Load(modelPath);
-
-		g_rect.shaderProgram = DefaultShaderProgram;
-
-		glUseProgram(g_rect.shaderProgram->m_id);
-		g_rect.shaderProgram->Uniform1i("aTexture", 0);
-
-		glUseProgram(0);
-
-		g_rectObj.Create();
-		m_entityRegistry.emplace<ModelComp>(g_rectObj.enttID, g_rect);
-
 		RegisterKey("quit", SDLK_ESCAPE);
 		RegisterKey("move_forward", SDLK_w);
 		RegisterKey("move_left", SDLK_a);
@@ -127,23 +108,10 @@ namespace CBE
 		RegisterKey("load_scene1", SDLK_1);
 		RegisterKey("load_scene2", SDLK_2);
 		RegisterKey("load_scene3", SDLK_3);
-		RegisterKey("Add_map", SDLK_k);
 
 		//HACK(fhomolka): There's a weird snap when the user first moves the mouse, this is here to fix that.
 		m_renderer->camera.MouseLook({0.0f, 0.0f}, 0);
 		LoadScene(GAME_DIR"/scenes/scene01.json");
-	}
-
-	void AddBox()
-	{
-
-		std::string modelPath = GAME_DIR"/models/unnamed/unnamed.obj";
-		mapModel.Load(modelPath);
-
-		mapModel.shaderProgram = DefaultShaderProgram;
-
-		mapEntity.Create();
-		App::Instance().m_entityRegistry.emplace<ModelComp>(mapEntity.enttID, mapModel);
 	}
 
 	App::~App() 
@@ -214,11 +182,6 @@ namespace CBE
 			LoadScene(GAME_DIR"/scenes/scene03.json");
 		}
 
-		if(IsPressed("Add_map"))
-		{
-			AddBox();
-		}
-
 		static float speed = 1.0f;
 
 		if(IsPressed("move_fast")) 
@@ -238,15 +201,6 @@ namespace CBE
 			m_renderer->camera.position += m_renderer->camera.up * deltaTime * speed;
 		if(IsPressed("move_down"))
 			m_renderer->camera.position -= m_renderer->camera.up * deltaTime * speed;
-
-		if(IsPressed("cube_forward"))
-			g_rectObj.Transform().position += glm::rotateY(glm::vec3(1, 0, 0), glm::radians(g_rectObj.Transform().rotation.y)) * deltaTime;
-		if(IsPressed("cube_back"))
-			g_rectObj.Transform().position += glm::rotateY(glm::vec3(-1, 0, 0), glm::radians(g_rectObj.Transform().rotation.y)) * deltaTime;
-		if(IsPressed("cube_left"))
-			g_rectObj.Transform().rotation.y += 45 * deltaTime;
-		if(IsPressed("cube_right"))
-			g_rectObj.Transform().rotation.y -= 45 * deltaTime;
 	}
 	
 	int App::Loop()
