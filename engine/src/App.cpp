@@ -124,13 +124,14 @@ namespace CBE
 		RegisterKey("cube_left", SDLK_LEFT);
 		RegisterKey("cube_right", SDLK_RIGHT);
 
-		RegisterKey("load_scene1", SDLK_KP_1);
-		RegisterKey("load_scene2", SDLK_KP_2);
-		RegisterKey("load_scene3", SDLK_KP_3);
+		RegisterKey("load_scene1", SDLK_1);
+		RegisterKey("load_scene2", SDLK_2);
+		RegisterKey("load_scene3", SDLK_3);
 		RegisterKey("Add_map", SDLK_k);
 
 		//HACK(fhomolka): There's a weird snap when the user first moves the mouse, this is here to fix that.
 		m_renderer->camera.MouseLook({0.0f, 0.0f}, 0);
+		LoadScene(GAME_DIR"/scenes/scene01.json");
 	}
 
 	void AddBox()
