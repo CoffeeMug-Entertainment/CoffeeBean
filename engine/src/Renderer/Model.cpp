@@ -1,13 +1,17 @@
 #include "Model.h"
+#include "Renderer/Mesh.h"
 #include "Shader.h"
 #include "App.h"
 
+#include "Importers/ObjImporter.hpp"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include "stb_image.h"
 #include "fmt/core.h"
 #include <filesystem>
+
+#define USE_ASSIMP 0
 
 namespace CBE
 {
@@ -85,6 +89,7 @@ namespace CBE
 		}
 		else
 		{
+			fmt::println("Model {} has no materials", path);
 			newTex->width = MISSING_TEX.width;
 			newTex->height = MISSING_TEX.height;
 			newTex->comps = MISSING_TEX.comps;
@@ -116,7 +121,27 @@ namespace CBE
 
 	void Model::Load(std::string& path)
 	{
-		fmt::print("Importing model from path {}\n", path);
+#if USE_ASSIMP < 1
+		CBE::Mesh tempMesh;
+		if(LoadMeshFromOBJ(path, tempMesh)) 
+		{
+			tempMesh.Setup();
+			Texture* newTex = new Texture();
+			newTex->width = MISSING_TEX.width;
+			newTex->height = MISSING_TEX.height;
+			newTex->comps = MISSING_TEX.comps;
+			newTex->PushToGPU(MISSING_TEX_DATA);
+
+			tempMesh.texture = newTex;
+
+			this->meshes.emplace_back(tempMesh);
+		}
+		else 
+		{
+			fmt::print("Failed to load Model: {}", path);
+		}
+		return;
+#else
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
@@ -126,5 +151,7 @@ namespace CBE
 		}
 		
 		ProcessNode(*this, scene->mRootNode, scene, path);
+#endif
 	}
+
 }

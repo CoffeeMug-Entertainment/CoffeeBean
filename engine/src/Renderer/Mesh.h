@@ -16,8 +16,9 @@ namespace CBE
 	struct Vertex
 	{
 		glm::vec3 position;
-		glm::vec4 color;
+		glm::vec3 normal;
 		glm::vec2 texCoords;
+		glm::vec4 color;
 	};
 
 	struct Mesh
@@ -30,7 +31,7 @@ namespace CBE
 		Texture* texture;
 
 		void Setup();
-		void EmplaceVertex(glm::vec3 position = {0.0f, 0.0f, 0.0f}, glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f}, glm::vec2 texCoords = {0.0f, 0.0f});
+		void EmplaceVertex(glm::vec3 position = {0.0f, 0.0f, 0.0f}, glm::vec3 normal = {0.0f, 1.0f, 0.0f}, glm::vec2 texCoords = {0.0f, 0.0f}, glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f});
 	};
 }
 

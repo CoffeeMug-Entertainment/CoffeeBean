@@ -9,8 +9,9 @@ namespace CBE
 	#version 330 core
 
 	layout (location = 0) in vec3 aPos;
-	layout (location = 1) in vec4 aColor;
+	layout (location = 1) in vec3 aNorm;
 	layout (location = 2) in vec2 aTexCoord;
+	layout (location = 3) in vec4 aColor;
 	
 	out vec4 vertColor;
 	out vec2 texCoord;

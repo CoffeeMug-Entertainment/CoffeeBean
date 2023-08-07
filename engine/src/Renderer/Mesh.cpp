@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include <fmt/core.h>
 
 namespace CBE
 {
@@ -16,8 +17,8 @@ namespace CBE
 		ebo.Unbind();
 	}
 
-	void Mesh::EmplaceVertex(glm::vec3 position, glm::vec4 color, glm::vec2 texCoords)
+	void Mesh::EmplaceVertex(glm::vec3 position, glm::vec3 normal, glm::vec2 texCoords, glm::vec4 color)
 	{
-		vertices.emplace_back(Vertex{position, color, texCoords});
+		vertices.emplace_back(Vertex{position, normal, texCoords, color});
 	}
 }
