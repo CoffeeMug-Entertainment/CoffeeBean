@@ -107,6 +107,11 @@ namespace CBE
 			}
 		}
 
+		if(material.diffuse_map == nullptr)
+		{
+			material.diffuse_map = &MISSING_TEX;
+		}
+
 		return true;
 	}
 
