@@ -13,10 +13,11 @@ namespace CBE
 		int width;
 		int height;
 		int comps;
+		unsigned char* data;
 
-		unsigned char* Load(std::string& filePath);
+		bool Load(std::string& filePath);
 
-		void PushToGPU(unsigned char* data);
+		void PushToGPU();
 	};
 
 	extern Texture WHITE_PIXEL;

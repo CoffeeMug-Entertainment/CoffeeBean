@@ -4,26 +4,32 @@
 
 namespace CBE
 {
-	Texture WHITE_PIXEL = {0, 1, 1, 4};
 	unsigned char WHITE_PIXEL_DATA[1 * 1 * 4 + 1] = "\377\377\377\377";
-
-	Texture MISSING_TEX = {0, 2, 2, 4};
+	Texture WHITE_PIXEL = {0, 1, 1, 4, WHITE_PIXEL_DATA};
+	
 	unsigned char MISSING_TEX_DATA[2 * 2 * 4 + 1] = "\300\377\356\377K\037\016\377K\037\016\377\300\377\356\377";
+	Texture MISSING_TEX = {0, 2, 2, 4, MISSING_TEX_DATA};
 
-	unsigned char* Texture::Load(std::string& filePath)
+	bool Texture::Load(std::string& filePath)
 	{
 		unsigned char* tex_data = stbi_load(filePath.c_str(), &width, &height, &comps, 0);
 		if (!tex_data) 
 		{
-			fmt::print("Failed to load texture: {}\n\t Reason: {}", filePath, stbi_failure_reason());
-			return nullptr;
+			fmt::println("Failed to load texture: {}\n\t Reason: {}", filePath, stbi_failure_reason());
+			this->width = MISSING_TEX.width;
+			this->height = MISSING_TEX.height;
+			this->comps = MISSING_TEX.comps;
+			this->data = MISSING_TEX_DATA;
+			return false;
 		}
 
+		this->data = tex_data;
 		//stbi_image_free(tex_data);
-		return tex_data;
+
+		return true;
 	}
 
-	void Texture::PushToGPU(unsigned char* data)
+	void Texture::PushToGPU()
 	{
 		glGenTextures(1, &id);
 		glBindTexture(GL_TEXTURE_2D, id);
@@ -44,12 +50,12 @@ namespace CBE
 				gl_format = GL_RGB;
 				break;
 			default:
-				fmt::print("Image format not yet implemented, assuming GL_RGB! comps: {}", comps);
+				fmt::println("Image format not yet implemented, assuming GL_RGB! comps: {}", comps);
 				gl_format = GL_RGB;
 				break;
 		}
 
-		glTexImage2D(GL_TEXTURE_2D, 0, gl_format, width, height, 0, gl_format, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, gl_format, width, height, 0, gl_format, GL_UNSIGNED_BYTE, this->data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
