@@ -115,6 +115,7 @@ namespace CBE
 		LoadScene(GAME_DIR"/scenes/scene01.json");
 
 		MISSING_TEX.PushToGPU();
+		WHITE_PIXEL.PushToGPU();
 	}
 
 	App::~App() 
