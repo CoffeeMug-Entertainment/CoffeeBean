@@ -32,12 +32,6 @@
 * License: Public Domain or MIT
 * Acquired from: https://github.com/nothings/stb
 
-## Assimp
-
-* Version: git commit 888468e8f70d7379ac717d070244ef943e66ba41
-* License: Assimp License (modified BSD-3)
-* Acquired from: https://github.com/assimp/assimp/tree/888468e8f70d7379ac717d070244ef943e66ba41
-
 ## EnTT
 * Version: 3.11.1
 * License: MIT

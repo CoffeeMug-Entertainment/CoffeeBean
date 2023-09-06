@@ -31,24 +31,6 @@ add_subdirectory(${GLM_DIR})
 set(STB_DIR engine/thirdparty/stb)
 set(STB_INC_DIR ${STB_DIR})
 
-# assimp
-set(ASI_DIR engine/thirdparty/assimp)
-set(ASI_INC_DIR ${ASI_DIR}/include)
-set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF)
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
-set(ASSIMP_BUILD_ASSBIN_EXPORTER ON)
-set(ASSIMP_BUILD_ASSXML_EXPORTER ON)
-set(ASSIMP_BUILD_FBX_IMPORTER OFF) # FBX is broken atm
-set(ASSIMP_BUILD_SMD_IMPORTER OFF)
-set(ASSIMP_BUILD_X3D_IMPORTER OFF)
-set(ASSIMP_BUILD_OBJ_IMPORTER ON)
-set(ASSIMP_BUILD_GLTF_IMPORTER ON)
-set(ASSIMP_BUILD_IQM_IMPORTER ON)
-set(BUILD_SHARED_LIBS OFF)
-set(ASSIMP_BUILD_ZLIB ON)
-set(ASSIMP_BUILD_TESTS OFF)
-add_subdirectory(${ASI_DIR})
-
 # EnTT
 set(ENTT_DIR engine/thirdparty/EnTT)
 add_subdirectory(${ENTT_DIR})
@@ -92,9 +74,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${STB_INC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SIMDJSON_INC_DIR})
 
 IF(WIN32)
-	set(CBE_LDFLAGS fmt::fmt SDL2::SDL2-static SDL2::SDL2main assimp EnTT::EnTT)
+	set(CBE_LDFLAGS fmt::fmt SDL2::SDL2-static SDL2::SDL2main EnTT::EnTT)
 ELSEIF(UNIX)
-	set(CBE_LDFLAGS fmt::fmt SDL2::SDL2-static assimp::assimp EnTT::EnTT m pthread dl -static-libgcc -static-libstdc++)
+	set(CBE_LDFLAGS fmt::fmt SDL2::SDL2-static EnTT::EnTT m pthread dl -static-libgcc -static-libstdc++)
 ENDIF()
 
 target_link_libraries(${PROJECT_NAME} ${CBE_LDFLAGS})
