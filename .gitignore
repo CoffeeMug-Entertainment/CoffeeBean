@@ -1,0 +1,8 @@
+build
+*.x86_64
+*.exe
+*.so
+*.dll
+*.a
+*.lib
+*.pdb 

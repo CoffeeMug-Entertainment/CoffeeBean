@@ -1,0 +1,583 @@
+package CBE
+
+import "libs:mdf"
+
+import glm "core:math/linalg/glsl"
+import SDL "vendor:sdl2"
+import gl "vendor:OpenGL"
+import stbi "vendor:stb/image"
+
+import "core:fmt"
+import "core:strings"
+import "core:strconv"
+
+TARGET_FPS :: 60
+TARGET_FRAMETIME :f32: 1000/TARGET_FPS
+
+App :: struct
+{
+	window : ^SDL.Window,
+	gl_context : SDL.GLContext,
+	running : bool,
+	delta_time: f32,
+
+	//Assets
+	models: map[string]Model,
+	textures: map[string]Texture,
+
+	//Input
+	keyboard_state: []u8,
+	last_keyboard_state: []u8,
+
+	//Entities
+	entities: [1024]Entity,
+	entity_count: u32,
+}
+
+g_program : u32
+g_uniforms: gl.Uniforms
+
+key_down :: proc(sc: SDL.Scancode) -> bool
+{
+	return g_app.keyboard_state[sc] > 0
+}
+
+key_pressed :: proc(sc: SDL.Scancode) -> bool
+{
+	return g_app.keyboard_state[sc] > 0 && g_app.last_keyboard_state[sc] == 0
+}
+
+app_init :: proc() -> bool
+{
+	// SDL
+	sdl_init_error := SDL.Init(SDL.INIT_EVERYTHING)
+	if sdl_init_error < 0 do return false
+
+	g_app.window = SDL.CreateWindow("CoffeeBean", 
+								SDL.WINDOWPOS_CENTERED, SDL.WINDOWPOS_CENTERED,
+								1280, 720,
+								SDL.WINDOW_SHOWN | SDL.WINDOW_OPENGL)
+
+	if g_app.window == nil do return false
+
+	//GL
+	SDL.GL_SetAttribute(.CONTEXT_PROFILE_MASK,  i32(SDL.GLprofile.CORE))
+	SDL.GL_SetAttribute(.CONTEXT_MAJOR_VERSION, 3)
+	SDL.GL_SetAttribute(.CONTEXT_MINOR_VERSION, 0)
+	g_app.gl_context = SDL.GL_CreateContext(g_app.window)
+	gl.load_up_to(3, 0, SDL.gl_set_proc_address)
+
+	program, ok := gl.load_shaders_source(VERTEX_DEFAULT_SRC, FRAGMENT_DEFAULT_SRC)
+	if !ok {fmt.println("GLSL Error: ", gl.get_last_error_message()); return false}
+
+	g_program = program
+	g_uniforms = gl.get_uniforms_from_program(program)
+
+	gl.Enable(gl.DEPTH_TEST)
+
+	SDL.GL_SetSwapInterval(1) //Vsync
+
+	stbi.set_flip_vertically_on_load_thread(true)
+
+	//Camera
+	g_camera.position = glm.vec3{0, 0, 1}
+	g_camera.position = glm.vec3{0, 0, 1}
+	g_camera.target = glm.vec3{0, 0, 0}
+	g_camera.up = glm.vec3{0, 1, 0}
+
+
+	//Entities
+	g_app.entity_count = 0
+
+	for i := 0; i < 1024; i += 1
+	{
+		en := &g_app.entities[i]
+		en.flags = {}
+		en.position = glm.vec3{0, 0, 0}
+		en.velocity = glm.vec3{0, 0, 0}
+		en.update = nil
+	}
+
+	world_create()
+	player_create()
+
+	g_app.running = true
+
+	return true
+}
+
+app_shutdown :: proc()
+{
+	SDL.GL_DeleteContext(g_app.gl_context)
+	SDL.DestroyWindow(g_app.window)
+	SDL.Quit()
+}
+
+app_process_events :: proc()
+{
+	event: SDL.Event
+
+	g_app.keyboard_state = SDL.GetKeyboardStateAsSlice()
+
+	for SDL.PollEvent(&event)
+	{
+		#partial switch event.type 
+		{
+			case .QUIT:
+			{
+				g_app.running = false
+			}
+			//Pumping events for the KeyboardState
+			case .KEYUP:{}
+			case .KEYDOWN:{}
+			case .MOUSEMOTION:
+			{
+				mousemovement := glm.vec2{cast(f32)event.motion.xrel, cast(f32)event.motion.yrel}
+				camera_rotate(mousemovement * g_app.delta_time * 8)
+			}
+		}
+	}
+}
+
+mouse_captured :SDL.bool= false
+
+app_update :: proc()
+{
+	//TEMP
+	if key_down(.ESCAPE)
+	{
+		g_app.running = false
+	}
+
+	for i := 0; i < 1024; i += 1
+	{
+		en := &g_app.entities[i]
+
+		if .VALID not_in en.flags do continue
+
+		if en.update != nil do en.update(en)
+	}
+
+	//TEMP
+	{
+		if key_pressed(.F1)
+		{
+			mouse_captured = !mouse_captured
+			SDL.SetRelativeMouseMode(mouse_captured)
+		}
+	}
+}
+
+app_render :: proc()
+{
+	view := glm.mat4LookAt(g_camera.position, g_camera.position + g_camera.forward, g_camera.up)
+	proj := glm.mat4Perspective(1, 16.0/9.0, 0.05, 2048.0)
+
+	gl.Viewport(0, 0, 1280, 720)
+	gl.ClearColor(0.21, 0.21, 0.21, 1.0)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+	gl.UseProgram(g_program)
+	for i := 0; i < 1024; i += 1
+	{
+		en := &g_app.entities[i]
+		if .VALID not_in en.flags do continue
+		if .RENDERABLE not_in en.flags do continue
+
+		entity_render(en, view, proj)
+	}
+
+	SDL.GL_SwapWindow(g_app.window);
+}
+
+g_app : App
+
+aspect_ratio :: 16.0/9.0
+
+VERTEX_DEFAULT_SRC :: #load("./shaders/default_vertex.glsl", string)
+FRAGMENT_DEFAULT_SRC :: #load("./shaders/default_fragment.glsl", string)
+
+Submesh :: struct
+{
+	material: string,
+	indices: [dynamic]u16,
+
+	ebo: u32
+}
+
+Mesh :: struct
+{
+	name: string,
+	local_transform: glm.mat4,
+	vertices: [dynamic]glm.vec3,
+	uvs: [dynamic]glm.vec2,
+	submeshes: [dynamic]Submesh,
+
+	vao: u32,
+	vertex_vbo: u32,
+	uv_vbo: u32,
+}
+
+Model :: struct
+{
+	meshes: [dynamic]Mesh
+}
+
+Texture :: struct
+{
+	width: i32,
+	height: i32,
+	npp: i32,
+	data: [^]byte,
+
+	ID: u32
+}
+
+model_render :: proc(model: ^Model, transform_matrix: glm.mat4, projection_matrix: glm.mat4, view_matrix: glm.mat4)
+{
+	gl.UseProgram(g_program)
+	
+	for mesh in model.meshes
+	{
+		gl.BindVertexArray(mesh.vao)
+
+		u_transform := projection_matrix * view_matrix * (/*mesh.local_transform + */ transform_matrix)
+		gl.UniformMatrix4fv(g_uniforms["u_transform"].location, 1, false, &u_transform[0, 0])
+
+		for submesh, s in mesh.submeshes
+		{
+			smesh_ref := mesh.submeshes[s]
+
+			gl.ActiveTexture(gl.TEXTURE0)
+			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+			gl.BindTexture(gl.TEXTURE_2D, g_app.textures[smesh_ref.material].ID);
+
+			gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, submesh.ebo)
+			gl.DrawElements(gl.TRIANGLES, i32(len(submesh.indices)), gl.UNSIGNED_SHORT, nil)
+		}
+	}
+}
+
+load_model_m3d :: proc(path: string) -> (^Model, bool)
+{
+	doc, doc_ok := mdf.load_from_file(path)
+
+	if doc_ok != .NONE do return nil, false
+
+	if doc.properties[0].(mdf.Chunk).name != "Mars3DScene"
+	{
+		fmt.printf("%s is not a M3D model!\n", path)
+		return nil, false
+	}
+
+	doc_objects := doc.properties[0].(mdf.Chunk).properties["Objects"].(mdf.Array)
+
+	model: Model
+
+	for p in doc_objects.properties
+	{
+		switch e in p 
+		{
+			case mdf.Chunk:
+			//fmt.println(e.name)
+			mesh: Mesh
+
+			mesh.name = strings.clone(e.properties["Name"].(mdf.Value).val)
+			
+			//Local Transform
+			{
+				transform_str := e.properties["LocalTransform"].(mdf.Value).val
+				//fmt.println(transform_str)
+				
+				transform_val_arr := strings.split(transform_str, " ")
+				//fmt.println(transform_val_arr)
+				//fmt.println(len(transform_val_arr))
+
+				for y := 0; y < 4; y += 1
+				{
+					for x := 0; x < 4; x += 1
+					{
+						idx := x + y * 4
+						temp_val, ok := strconv.parse_f32(transform_val_arr[idx])
+						mesh.local_transform[x, y] = temp_val;
+					}
+				}
+			}
+			
+			//Vertices
+			{
+				vtx_ar := e.properties["Vertices"].(mdf.Array)
+				//fmt.println(vtx_ar.properties)
+				//fmt.println(len(vtx_ar.properties))
+
+				for vtx_val in vtx_ar.properties
+				{
+					//fmt.println(vtx_val.(mdf.Value).val)
+					vtx_str_arr := strings.split(vtx_val.(mdf.Value).val, " ")
+					vec: glm.vec3
+					for v, i in vtx_str_arr
+					{
+						temp_val, ok := strconv.parse_f32(v)
+						vec[i] = temp_val;
+					}
+					append(&mesh.vertices, vec)
+				}
+			}
+
+			// UVs
+			{
+				uv_ar := e.properties["UVs"].(mdf.Array)
+				for uv_val in uv_ar.properties
+				{
+					//fmt.println(uv_val.(mdf.Value).val)
+					uv_str_arr := strings.split(uv_val.(mdf.Value).val, " ")
+					uv: glm.vec2
+					for u, i in uv_str_arr
+					{
+						temp_val, ok := strconv.parse_f32(u)
+						uv[i] = temp_val;
+					}
+					append(&mesh.uvs, uv)
+				}
+			}
+			// Submeshes
+			{
+				submesh_ar := e.properties["Submeshes"].(mdf.Array)
+				for s in submesh_ar.properties
+				{
+					c := s.(mdf.Chunk)
+					//fmt.println(c)
+					submesh: Submesh
+
+					submesh.material = c.properties["Material"].(mdf.Value).val
+
+					indices_ar := c.properties["Indices"].(mdf.Array)
+					for idx, i in indices_ar.properties
+					{
+						//fmt.println(idx.(mdf.Value).val)
+						temp_val, ok := strconv.parse_uint(idx.(mdf.Value).val)
+						append(&submesh.indices, u16(temp_val))
+					}
+
+					append(&mesh.submeshes, submesh)
+				}
+			}
+
+			append(&model.meshes, mesh)
+			
+			case mdf.Array:
+			fmt.println(e.name)
+			case mdf.Value:
+			fmt.println(e.name)
+		}
+	}
+
+	for m := 0; m < len(model.meshes); m += 1
+	{
+		mesh := &model.meshes[m]
+
+		gl.GenVertexArrays(1, &mesh.vao)
+		gl.BindVertexArray(mesh.vao)
+
+		gl.GenBuffers(1, &mesh.vertex_vbo)
+		gl.BindBuffer(gl.ARRAY_BUFFER, mesh.vertex_vbo)
+		gl.BufferData(gl.ARRAY_BUFFER, len(mesh.vertices) * size_of(mesh.vertices[0]), raw_data(mesh.vertices), gl.STATIC_DRAW)
+
+		gl.EnableVertexAttribArray(0)
+		gl.VertexAttribPointer(0, 3, gl.FLOAT, false, size_of(glm.vec3), 0)
+
+		gl.GenBuffers(1, &mesh.uv_vbo)
+		gl.BindBuffer(gl.ARRAY_BUFFER, mesh.uv_vbo)
+		gl.BufferData(gl.ARRAY_BUFFER, len(mesh.uvs) * size_of(mesh.uvs[0]), raw_data(mesh.uvs), gl.STATIC_DRAW)
+
+		gl.EnableVertexAttribArray(1)
+		gl.VertexAttribPointer(1, 2, gl.FLOAT, false, size_of(glm.vec2), 0)
+
+		for i := 0; i < len(mesh.submeshes); i += 1
+		{
+			smesh := &mesh.submeshes[i]
+
+			load_texture(smesh.material)
+			push_image_to_GPU(smesh.material)
+
+
+			gl.GenBuffers(1, &smesh.ebo)
+			gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, smesh.ebo)
+			gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(smesh.indices) * size_of(smesh.indices[0]), raw_data(smesh.indices), gl.STATIC_DRAW)
+		}
+	}
+
+	g_app.models[path] = model
+
+	return &g_app.models[path], true
+}
+
+load_texture :: proc(path: string)
+{
+	filepath_cstring := strings.clone_to_cstring(path)
+	new_sprite: Texture
+
+	new_sprite.data = stbi.load(filepath_cstring, &new_sprite.width, &new_sprite.height, &new_sprite.npp, 0)
+
+
+	g_app.textures[path] = new_sprite
+	delete(filepath_cstring)
+}
+
+push_image_to_GPU :: proc(texture_id: string)
+{
+	texture := &g_app.textures[texture_id]
+
+	gl.GenTextures(1, &texture.ID)
+	gl.BindTexture(gl.TEXTURE_2D, texture.ID)
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, texture.width, texture.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, &texture.data[0])
+}
+
+Camera :: struct
+{
+	position: glm.vec3,
+	rotation: glm.vec3,
+	target: glm.vec3,
+	up: glm.vec3,
+	right: glm.vec3,
+	forward: glm.vec3,
+}
+
+g_camera: Camera
+
+camera_move :: proc(dir: glm.vec3)
+{
+	g_camera.position += dir
+	g_camera.target += dir
+
+}
+
+camera_rotate :: proc(dir: glm.vec2)
+{
+	using g_camera;
+	g_camera.rotation.x -= dir.y
+	g_camera.rotation.y += dir.x
+
+	g_camera.rotation.x = clamp(g_camera.rotation.x, -89.0, 89.0)
+
+	forward.x = glm.cos(glm.radians(rotation.y)) * glm.cos(glm.radians(rotation.x))
+	forward.y = glm.sin(glm.radians(rotation.x))
+	forward.z = glm.sin(glm.radians(rotation.y)) * glm.cos(glm.radians(rotation.x))
+	forward = glm.normalize(forward)
+
+	right = glm.normalize(glm.cross(forward, glm.vec3{0, 1, 0}))
+	up = glm.normalize(glm.cross(right, forward))
+}
+
+EntityFlagsEnum :: enum u32
+{
+	VALID,
+	RENDERABLE,
+	PHYSICS,
+	PLAYER,
+}
+
+EntityFlagsSet :: bit_set[EntityFlagsEnum; u32]
+
+Entity :: struct
+{
+	flags: EntityFlagsSet,
+	name: string,
+	position: glm.vec3,
+	rotation: glm.vec3,
+	velocity: glm.vec3,
+
+	model: string,
+
+	update: proc(^Entity),
+}
+
+entity_create :: proc() -> ^Entity
+{
+	en := &g_app.entities[g_app.entity_count]
+	en.flags |= {.VALID}
+
+	g_app.entity_count += 1
+
+	return en
+}
+
+entity_render :: proc(en: ^Entity, view_matrix: glm.mat4, proj_matrix: glm.mat4)
+{
+	transform_matrix := glm.identity(glm.mat4)
+	transform_matrix += glm.mat4Translate(en.position)
+	transform_matrix *= glm.mat4Rotate(glm.vec3{1, 0, 0}, glm.radians(en.rotation.x))
+	transform_matrix *= glm.mat4Rotate(glm.vec3{0, 1, 0}, glm.radians(en.rotation.y))
+	transform_matrix *= glm.mat4Rotate(glm.vec3{0, 0, 1}, glm.radians(en.rotation.z))
+
+	model := &g_app.models[en.model]
+	model_render(model, transform_matrix, proj_matrix, view_matrix)
+	
+}
+
+world_create :: proc()
+{
+	load_model_m3d("./basegame/models/map.m3d")
+
+	world := entity_create()
+	world.model = "./basegame/models/map.m3d"
+	world.name = "World"
+	world.flags |= {.RENDERABLE}
+	if world.model == "./basegame/models/map.m3d" do world.rotation.x = 90 //TEMP hackery, lol
+}
+
+player_create :: proc()
+{
+	player := entity_create()
+	player.name = "Player"
+	player.flags |= {.PLAYER}
+	player.update = player_update
+}
+
+player_update :: proc(player: ^Entity)
+{
+	SPEED :: 128.0
+	move_dir: glm.vec3
+
+	delta_speed := SPEED * g_app.delta_time
+	if key_down(.LSHIFT) 
+	{
+		delta_speed *= 10	
+	}
+
+	if key_down(.A)
+	{
+		move_dir -= g_camera.right * delta_speed
+	}
+	if key_down(.D)
+	{
+		move_dir += g_camera.right * delta_speed
+	}
+
+	if key_down(.W)
+	{
+		move_dir += g_camera.forward * delta_speed
+	}
+	if key_down(.S)
+	{
+		move_dir -= g_camera.forward * delta_speed
+	}
+	
+	if key_down(.SPACE)
+	{
+		move_dir += g_camera.up * delta_speed
+	}
+	if key_down(.C)
+	{
+		move_dir -= g_camera.up * delta_speed
+	}
+
+	player.position += move_dir
+
+	g_camera.position = player.position
+	//g_camera.rotation = player.rotation
+}
