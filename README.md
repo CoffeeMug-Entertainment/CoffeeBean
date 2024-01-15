@@ -12,7 +12,7 @@ CoffeeBean is a 3D game engine with the primary focus on First-Person games.
 
 ## How to build?
 
-If you have installed [Odin](https://odin-lang.org/), you should be able to run `build.sh`
+If you have installed [Odin](https://odin-lang.org/), you should be able to run `build.sh` or `build.bat`
 
 ## Dependencies
 
