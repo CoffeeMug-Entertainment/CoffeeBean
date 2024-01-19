@@ -21,6 +21,17 @@ App :: struct
 	running : bool,
 	delta_time: f32,
 
+	//Screen Framebuffer
+	screen_framebuffer: u32,
+	screen_colorbuffer: u32,
+	screen_renderbuffer: u32,
+	screen_shaderprogram: u32,
+	screen_shaderuniforms: gl.Uniforms,
+	screen_vtx_vbo: u32,
+	screen_uv_vbo: u32,
+	screen_vao: u32,
+	screen_ebo: u32,
+
 	//Assets
 	models: map[string]Model,
 	textures: map[string]Texture,
@@ -75,9 +86,60 @@ app_init :: proc() -> bool
 
 	gl.Enable(gl.DEPTH_TEST)
 
+	/*
+	gl.Enable(gl.CULL_FACE)
+	gl.CullFace(gl.FRONT)
+	*/
+
+	//Framebuffer
+	gl.GenFramebuffers(1, &g_app.screen_framebuffer)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, g_app.screen_framebuffer)
+
+	gl.GenTextures(1, &g_app.screen_colorbuffer)
+	gl.BindTexture(gl.TEXTURE_2D, g_app.screen_colorbuffer)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, 1280, 720, 0, gl.RGB, gl.UNSIGNED_BYTE, nil)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, g_app.screen_colorbuffer, 0);
+
+	gl.GenRenderbuffers(1, &g_app.screen_renderbuffer)
+	gl.BindRenderbuffer(gl.RENDERBUFFER, g_app.screen_renderbuffer)
+	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH24_STENCIL8, 1280, 720)
+
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, g_app.screen_renderbuffer)
+
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
+	gl.GenVertexArrays(1, &g_app.screen_vao)
+	gl.BindVertexArray(g_app.screen_vao)
+
+	gl.GenBuffers(1, &g_app.screen_vtx_vbo)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, g_app.screen_vtx_vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, len(SCREEN_VTX) * size_of(SCREEN_VTX[0]), raw_data(SCREEN_VTX), gl.STATIC_DRAW)
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, size_of(glm.vec3), 0)
+
+	gl.GenBuffers(1, &g_app.screen_uv_vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, g_app.screen_uv_vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, len(SCREEN_UV) * size_of(SCREEN_UV[0]), raw_data(SCREEN_UV), gl.STATIC_DRAW)
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointer(1, 2, gl.FLOAT, false, size_of(glm.vec2), 0)
+
+	gl.GenBuffers(1, &g_app.screen_ebo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, g_app.screen_ebo)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(SCREEN_EBO) * size_of(SCREEN_EBO[0]), raw_data(SCREEN_EBO), gl.STATIC_DRAW)
+
+	program, ok = gl.load_shaders_source(SCREEN_VERTEX_DEFAULT_SRC, SCREEN_FRAGMENT_DEFAULT_SRC)
+	if !ok {fmt.println("GLSL Error: ", gl.get_last_error_message()); return false}
+
+	g_app.screen_shaderprogram = program
+	g_app.screen_shaderuniforms = gl.get_uniforms_from_program(program)
+
+
 	SDL.GL_SetSwapInterval(1) //Vsync
 
-	stbi.set_flip_vertically_on_load_thread(true)
+	//stbi.set_flip_vertically_on_load_thread(true)
 
 	//Camera
 	g_camera.position = glm.vec3{0, 0, 1}
@@ -173,6 +235,9 @@ app_render :: proc()
 	view := glm.mat4LookAt(g_camera.position, g_camera.position + g_camera.forward, g_camera.up)
 	proj := glm.mat4Perspective(1, 16.0/9.0, 0.05, 2048.0)
 
+	gl.BindFramebuffer(gl.FRAMEBUFFER, g_app.screen_framebuffer)
+	gl.Enable(gl.DEPTH_TEST)
+
 	gl.Viewport(0, 0, 1280, 720)
 	gl.ClearColor(0.21, 0.21, 0.21, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -187,6 +252,16 @@ app_render :: proc()
 		entity_render(en, view, proj)
 	}
 
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+
+	gl.UseProgram(g_app.screen_shaderprogram)
+	gl.BindVertexArray(g_app.screen_vao)
+	gl.Disable(gl.DEPTH_TEST)
+	gl.BindTexture(gl.TEXTURE_2D, g_app.screen_colorbuffer)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, g_app.screen_ebo)
+	gl.DrawElements(gl.TRIANGLES, i32(len(SCREEN_EBO)), gl.UNSIGNED_SHORT, nil)
+
 	SDL.GL_SwapWindow(g_app.window);
 }
 
@@ -196,6 +271,27 @@ aspect_ratio :: 16.0/9.0
 
 VERTEX_DEFAULT_SRC :: #load("./shaders/default_vertex.glsl", string)
 FRAGMENT_DEFAULT_SRC :: #load("./shaders/default_fragment.glsl", string)
+SCREEN_VERTEX_DEFAULT_SRC :: #load("./shaders/default_screen_vertex.glsl", string)
+SCREEN_FRAGMENT_DEFAULT_SRC :: #load("./shaders/default_screen_fragment.glsl", string)
+
+SCREEN_VTX :: []glm.vec3 {
+	{-1.0, -1.0, 0.0},
+	{1.0, -1.0, 0.0},
+	{1.0, 1.0, 0.0},
+	{-1.0, 1.0, 0.0},
+}
+
+SCREEN_UV :: []glm.vec2 {
+	{0.0, 0.0},
+	{1.0, 0.0},
+	{1.0, 1.0},
+	{0.0, 1.0},
+}
+
+SCREEN_EBO :: []u16{
+	0, 1, 2,
+	0, 2, 3,
+}
 
 Submesh :: struct
 {
@@ -456,13 +552,15 @@ camera_move :: proc(dir: glm.vec3)
 
 }
 
+CAM_V_LIMIT :: 89.9
+
 camera_rotate :: proc(dir: glm.vec2)
 {
 	using g_camera;
 	g_camera.rotation.x -= dir.y
 	g_camera.rotation.y += dir.x
 
-	g_camera.rotation.x = clamp(g_camera.rotation.x, -89.0, 89.0)
+	g_camera.rotation.x = clamp(g_camera.rotation.x, -CAM_V_LIMIT, CAM_V_LIMIT)
 
 	forward.x = glm.cos(glm.radians(rotation.y)) * glm.cos(glm.radians(rotation.x))
 	forward.y = glm.sin(glm.radians(rotation.x))
