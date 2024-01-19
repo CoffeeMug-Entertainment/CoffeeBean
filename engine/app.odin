@@ -617,12 +617,14 @@ entity_render :: proc(en: ^Entity, view_matrix: glm.mat4, proj_matrix: glm.mat4)
 	
 }
 
+WORLD_MODEL :: "./basegame/models/map.m3d"
+
 world_create :: proc()
 {
-	load_model_m3d("./basegame/models/map.m3d")
+	load_model_m3d(WORLD_MODEL)
 
 	world := entity_create()
-	world.model = "./basegame/models/map.m3d"
+	world.model = WORLD_MODEL
 	world.name = "World"
 	world.flags |= {.RENDERABLE}
 	if world.model == "./basegame/models/map.m3d" do world.rotation.x = 90 //TEMP hackery, lol
