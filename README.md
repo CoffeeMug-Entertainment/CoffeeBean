@@ -7,7 +7,7 @@ CoffeeBean is a 3D game engine with the primary focus on First-Person games.
 ## Features
 
 * OpenGL Renderer
-* MDF support
+* [MDF](https://wiki.ironworksgames.com/doku.php?id=mdf_file_format) support
 
 
 ## How to build?
