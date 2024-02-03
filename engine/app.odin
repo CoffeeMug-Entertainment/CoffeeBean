@@ -173,6 +173,36 @@ app_init :: proc() -> bool
 
 app_shutdown :: proc()
 {
+	//QUESTION(fhomolka): Do we even care about freeing some of these in release mode?
+	gl.destroy_uniforms(g_app.screen_shaderuniforms)
+	gl.destroy_uniforms(g_uniforms)
+
+	for _, model in g_app.models
+	{
+		for mesh in model.meshes
+		{
+			delete(mesh.name)
+			delete(mesh.vertices)
+			delete(mesh.uvs)
+			for submesh in mesh.submeshes
+			{
+				delete(submesh.indices)
+				delete(submesh.material)
+			}
+			delete(mesh.submeshes)
+		}
+		delete(model.meshes)
+	}	
+	delete(g_app.models)
+
+
+	for _, texture in g_app.textures
+	{
+		free(texture.data)
+	}
+	delete(g_app.textures)
+
+
 	SDL.GL_DeleteContext(g_app.gl_context)
 	SDL.DestroyWindow(g_app.window)
 	SDL.Quit()
@@ -387,6 +417,7 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 			{
 				transform_str := e.properties["LocalTransform"].(mdf.Value).val
 				transform_val_arr := strings.split(transform_str, " ")
+				defer delete(transform_val_arr)
 
 				for y := 0; y < 4; y += 1
 				{
@@ -406,6 +437,7 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 				for vtx_val in vtx_ar.properties
 				{
 					vtx_str_arr := strings.split(vtx_val.(mdf.Value).val, " ")
+					defer delete(vtx_str_arr)
 					vec: glm.vec3
 					for v, i in vtx_str_arr
 					{
@@ -422,6 +454,7 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 				for uv_val in uv_ar.properties
 				{
 					uv_str_arr := strings.split(uv_val.(mdf.Value).val, " ")
+					defer delete(uv_str_arr)
 					uv: glm.vec2
 					for u, i in uv_str_arr
 					{
@@ -439,7 +472,7 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 					c := s.(mdf.Chunk)
 					submesh: Submesh
 
-					submesh.material = c.properties["Material"].(mdf.Value).val
+					submesh.material = strings.clone(c.properties["Material"].(mdf.Value).val)
 
 					indices_ar := c.properties["Indices"].(mdf.Array)
 					for idx, i in indices_ar.properties
@@ -497,6 +530,10 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 	}
 
 	g_app.models[path] = model
+
+	//QUESTION(fhomolka): Keep the doc in memory, for use for substrings for stuff like materials
+	//					  Instead of cloning strings
+	mdf.destroy(doc)
 
 	return &g_app.models[path], true
 }
