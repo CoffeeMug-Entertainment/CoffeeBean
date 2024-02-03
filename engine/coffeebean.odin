@@ -6,8 +6,7 @@ import "core:log"
 
 main :: proc()
 {
-	logger: log.Logger
-	logger = log.create_console_logger()
+	logger := log.create_console_logger()
 	defer log.destroy_console_logger(logger)
 	context.logger = logger
 
