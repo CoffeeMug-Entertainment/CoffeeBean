@@ -1,14 +1,19 @@
 package CBE
 
-import "core:fmt"
 import SDL "vendor:sdl2"
 import "core:slice"
+import "core:log"
 
 main :: proc()
 {
+	logger: log.Logger
+	logger = log.create_console_logger()
+	defer log.destroy_console_logger(logger)
+	context.logger = logger
+
 	if !app_init()
 	{
-		fmt.println("Init failed, reason:\n\t",SDL.GetError())
+		log.error("Init failed, reason:\n\t",SDL.GetError())
 		return
 	}
 	defer app_shutdown()

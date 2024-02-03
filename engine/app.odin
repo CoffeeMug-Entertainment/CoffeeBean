@@ -7,7 +7,7 @@ import SDL "vendor:sdl2"
 import gl "vendor:OpenGL"
 import stbi "vendor:stb/image"
 
-import "core:fmt"
+import "core:log"
 import "core:strings"
 import "core:strconv"
 
@@ -79,7 +79,7 @@ app_init :: proc() -> bool
 	gl.load_up_to(3, 0, SDL.gl_set_proc_address)
 
 	program, ok := gl.load_shaders_source(VERTEX_DEFAULT_SRC, FRAGMENT_DEFAULT_SRC)
-	if !ok {fmt.println("GLSL Error: ", gl.get_last_error_message()); return false}
+	if !ok {log.error("GLSL Error: ", gl.get_last_error_message()); return false}
 
 	g_program = program
 	g_uniforms = gl.get_uniforms_from_program(program)
@@ -134,7 +134,7 @@ app_init :: proc() -> bool
 	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(SCREEN_EBO) * size_of(SCREEN_EBO[0]), raw_data(SCREEN_EBO), gl.STATIC_DRAW)
 
 	program, ok = gl.load_shaders_source(SCREEN_VERTEX_DEFAULT_SRC, SCREEN_FRAGMENT_DEFAULT_SRC)
-	if !ok {fmt.println("GLSL Error: ", gl.get_last_error_message()); return false}
+	if !ok {log.error("GLSL Error: ", gl.get_last_error_message()); return false}
 
 	g_app.screen_shaderprogram = program
 	g_app.screen_shaderuniforms = gl.get_uniforms_from_program(program)
@@ -366,7 +366,7 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 
 	if doc.properties[0].(mdf.Chunk).name != "Mars3DScene"
 	{
-		fmt.printf("%s is not a M3D model!\n", path)
+		log.error("%s is not a M3D model!\n", path)
 		return nil, false
 	}
 
@@ -379,7 +379,6 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 		switch e in p 
 		{
 			case mdf.Chunk:
-			//fmt.println(e.name)
 			mesh: Mesh
 
 			mesh.name = strings.clone(e.properties["Name"].(mdf.Value).val)
@@ -387,11 +386,7 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 			//Local Transform
 			{
 				transform_str := e.properties["LocalTransform"].(mdf.Value).val
-				//fmt.println(transform_str)
-				
 				transform_val_arr := strings.split(transform_str, " ")
-				//fmt.println(transform_val_arr)
-				//fmt.println(len(transform_val_arr))
 
 				for y := 0; y < 4; y += 1
 				{
@@ -407,12 +402,9 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 			//Vertices
 			{
 				vtx_ar := e.properties["Vertices"].(mdf.Array)
-				//fmt.println(vtx_ar.properties)
-				//fmt.println(len(vtx_ar.properties))
 
 				for vtx_val in vtx_ar.properties
 				{
-					//fmt.println(vtx_val.(mdf.Value).val)
 					vtx_str_arr := strings.split(vtx_val.(mdf.Value).val, " ")
 					vec: glm.vec3
 					for v, i in vtx_str_arr
@@ -429,7 +421,6 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 				uv_ar := e.properties["UVs"].(mdf.Array)
 				for uv_val in uv_ar.properties
 				{
-					//fmt.println(uv_val.(mdf.Value).val)
 					uv_str_arr := strings.split(uv_val.(mdf.Value).val, " ")
 					uv: glm.vec2
 					for u, i in uv_str_arr
@@ -446,7 +437,6 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 				for s in submesh_ar.properties
 				{
 					c := s.(mdf.Chunk)
-					//fmt.println(c)
 					submesh: Submesh
 
 					submesh.material = c.properties["Material"].(mdf.Value).val
@@ -454,7 +444,6 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 					indices_ar := c.properties["Indices"].(mdf.Array)
 					for idx, i in indices_ar.properties
 					{
-						//fmt.println(idx.(mdf.Value).val)
 						temp_val, ok := strconv.parse_uint(idx.(mdf.Value).val)
 						append(&submesh.indices, u16(temp_val))
 					}
@@ -466,9 +455,9 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 			append(&model.meshes, mesh)
 			
 			case mdf.Array:
-			fmt.println(e.name)
+			//fmt.println(e.name)
 			case mdf.Value:
-			fmt.println(e.name)
+			//fmt.println(e.name)
 		}
 	}
 
