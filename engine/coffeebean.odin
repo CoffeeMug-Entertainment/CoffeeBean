@@ -3,12 +3,30 @@ package CBE
 import SDL "vendor:sdl2"
 import "core:slice"
 import "core:log"
+import "core:mem"
 
 main :: proc()
 {
 	logger := log.create_console_logger()
 	defer log.destroy_console_logger(logger)
 	context.logger = logger
+
+	when ODIN_DEBUG
+	{
+		tracking_allocator: mem.Tracking_Allocator
+		mem.tracking_allocator_init(&tracking_allocator, context.allocator)
+		context.allocator = mem.tracking_allocator(&tracking_allocator)
+
+		defer 
+		{
+			for k, v in tracking_allocator.allocation_map
+			{
+				log.warnf("%v: Leaked %v bytes\n", v.location, v.size)
+			}
+
+			mem.tracking_allocator_clear(&tracking_allocator)
+		} 
+	}
 
 	if !app_init()
 	{
