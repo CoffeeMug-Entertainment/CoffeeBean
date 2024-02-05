@@ -150,7 +150,6 @@ process_chunk :: proc(slice: []Token) -> (chunk: Chunk, ok: bool)
 						}
 
 						sub_slice := slice[ei + 1:closing_index]
-						defer delete(sub_slice)
 						array, ok := process_array(sub_slice)
 						if !ok { return chunk, false}
 						array.name = slice[i].value
@@ -179,7 +178,6 @@ process_chunk :: proc(slice: []Token) -> (chunk: Chunk, ok: bool)
 						}
 
 						sub_slice := slice[ei + 1:closing_index]
-						defer delete(sub_slice)
 						c, ok := process_chunk(sub_slice)
 						if !ok { return chunk, false }
 						c.name = slice[i].value
@@ -481,7 +479,6 @@ parse_string :: proc(data: string) -> (doc: ^Document, err: Error)
 						}
 
 						slice := doc.tokens[ei:closing_index]
-						defer delete(slice)
 						new_chunk, ok := process_chunk(slice)
 						if !ok {return doc, .FAIL}
 						new_chunk.name = doc.tokens[i].value
@@ -510,7 +507,6 @@ parse_string :: proc(data: string) -> (doc: ^Document, err: Error)
 						}
 
 						slice := doc.tokens[ei:closing_index]
-						defer delete(slice)
 						new_arr, ok := process_array(slice)
 						if !ok {return doc, .FAIL}
 						append(&doc.properties, new_arr)
