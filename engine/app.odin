@@ -139,10 +139,11 @@ app_init :: proc() -> bool
 	g_app.screen_shaderprogram = program
 	g_app.screen_shaderuniforms = gl.get_uniforms_from_program(program)
 
-
 	SDL.GL_SetSwapInterval(1) //Vsync
 
 	//stbi.set_flip_vertically_on_load_thread(true)
+
+	g_app.keyboard_state = SDL.GetKeyboardStateAsSlice()
 
 	//Camera
 	g_camera.position = glm.vec3{0, 0, 1}
@@ -198,10 +199,15 @@ app_shutdown :: proc()
 
 	for _, texture in g_app.textures
 	{
-		free(texture.data)
+		//BUG(fhomolka) Apparently it's not there?
+		//These are not explicitly freed anywhere, but it causes a segfault when attempting to free them
+		//Tracking allocator isn't complaining
+		//free(texture.data)
 	}
 	delete(g_app.textures)
 
+	delete(g_app.keyboard_state)
+	delete(g_app.last_keyboard_state)
 
 	SDL.GL_DeleteContext(g_app.gl_context)
 	SDL.DestroyWindow(g_app.window)
@@ -211,8 +217,6 @@ app_shutdown :: proc()
 app_process_events :: proc()
 {
 	event: SDL.Event
-
-	g_app.keyboard_state = SDL.GetKeyboardStateAsSlice()
 
 	for SDL.PollEvent(&event)
 	{

@@ -51,8 +51,5 @@ main :: proc()
 
 		delete(g_app.last_keyboard_state)
 		g_app.last_keyboard_state = slice.clone(g_app.keyboard_state)
-		delete(g_app.keyboard_state)
 	}
-
-	delete(g_app.last_keyboard_state)
 }
