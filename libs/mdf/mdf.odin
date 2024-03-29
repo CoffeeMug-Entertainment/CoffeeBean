@@ -3,7 +3,7 @@ package mdf
 /* 
 * MDF Parser
 * Author: Filip Homolka / @fhomolka
-* License: zlib
+* License: public domain or zlib
 *
 * Clean-room implementation of Mars Data Format
 *
