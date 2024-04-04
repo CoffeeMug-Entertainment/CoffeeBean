@@ -86,8 +86,8 @@ app_init :: proc() -> bool
 
 	gl.Enable(gl.DEPTH_TEST)
 
-	gl.Enable(gl.BLEND);
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);  
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)  
 
 	/*
 	gl.Enable(gl.CULL_FACE)
@@ -103,7 +103,7 @@ app_init :: proc() -> bool
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGB, 1280, 720, 0, gl.RGB, gl.UNSIGNED_BYTE, nil)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, g_app.screen_colorbuffer, 0);
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, g_app.screen_colorbuffer, 0)
 
 	gl.GenRenderbuffers(1, &g_app.screen_renderbuffer)
 	gl.BindRenderbuffer(gl.RENDERBUFFER, g_app.screen_renderbuffer)
@@ -299,7 +299,7 @@ app_render :: proc()
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, g_app.screen_ebo)
 	gl.DrawElements(gl.TRIANGLES, i32(len(SCREEN_EBO)), gl.UNSIGNED_SHORT, nil)
 
-	SDL.GL_SwapWindow(g_app.window);
+	SDL.GL_SwapWindow(g_app.window)
 }
 
 g_app : App
@@ -384,7 +384,7 @@ model_render :: proc(model: ^Model, transform_matrix: glm.mat4, projection_matri
 			gl.ActiveTexture(gl.TEXTURE0)
 			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-			gl.BindTexture(gl.TEXTURE_2D, g_app.textures[smesh_ref.material].ID);
+			gl.BindTexture(gl.TEXTURE_2D, g_app.textures[smesh_ref.material].ID)
 
 			gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, submesh.ebo)
 			gl.DrawElements(gl.TRIANGLES, i32(len(submesh.indices)), gl.UNSIGNED_SHORT, nil)
@@ -429,7 +429,7 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 					{
 						idx := x + y * 4
 						temp_val, ok := strconv.parse_f32(transform_val_arr[idx])
-						mesh.local_transform[x, y] = temp_val;
+						mesh.local_transform[x, y] = temp_val
 					}
 				}
 			}
@@ -446,7 +446,7 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 					for v, i in vtx_str_arr
 					{
 						temp_val, ok := strconv.parse_f32(v)
-						vec[i] = temp_val;
+						vec[i] = temp_val
 					}
 					append(&mesh.vertices, vec)
 				}
@@ -463,7 +463,7 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 					for u, i in uv_str_arr
 					{
 						temp_val, ok := strconv.parse_f32(u)
-						uv[i] = temp_val;
+						uv[i] = temp_val
 					}
 					append(&mesh.uvs, uv)
 				}
@@ -589,7 +589,7 @@ CAM_V_LIMIT :: 89.9
 
 camera_rotate :: proc(dir: glm.vec2)
 {
-	using g_camera;
+	using g_camera
 	g_camera.rotation.x -= dir.y
 	g_camera.rotation.y += dir.x
 

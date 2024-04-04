@@ -35,7 +35,7 @@ main :: proc()
 	}
 	defer app_shutdown()
 
-	old_ticks := SDL.GetTicks();
+	old_ticks := SDL.GetTicks()
 
 	for g_app.running
 	{

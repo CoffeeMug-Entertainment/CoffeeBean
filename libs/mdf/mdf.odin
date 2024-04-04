@@ -39,7 +39,7 @@ TokenType :: enum
 	EQUALS,
 }
 
-TokenType_Set :: bit_set[TokenType];
+TokenType_Set :: bit_set[TokenType]
 
 TokenType_Elements: TokenType_Set : {.VALUE, .CHUNK_OPEN, .ARRAY_OPEN}
 
@@ -128,8 +128,8 @@ process_chunk :: proc(slice: []Token) -> (chunk: Chunk, ok: bool)
 						chunk.properties[new_val.name] = new_val
 						i = ei
 					case .ARRAY_OPEN:
-						nesting := 1;
-						closing_index := ei + 1;
+						nesting := 1
+						closing_index := ei + 1
 						for j := closing_index; j < len(slice); j += 1
 						{
 							if slice[j].type == .ARRAY_OPEN
@@ -156,8 +156,8 @@ process_chunk :: proc(slice: []Token) -> (chunk: Chunk, ok: bool)
 						chunk.properties[array.name] = array
 						i = closing_index
 					case .CHUNK_OPEN:
-						nesting := 1;
-						closing_index := ei + 1;
+						nesting := 1
+						closing_index := ei + 1
 						for j := closing_index; j < len(slice); j += 1
 						{
 							if slice[j].type == .CHUNK_OPEN
@@ -228,8 +228,8 @@ process_array :: proc(slice: []Token) -> (array: Array, ok: bool)
 						append(&array.properties, new_val)
 						i = ei
 					case .CHUNK_OPEN:
-						nesting := 1;
-						closing_index := ei + 1;
+						nesting := 1
+						closing_index := ei + 1
 						for j := closing_index; j < len(slice); j += 1
 						{
 							if slice[j].type == .CHUNK_OPEN
@@ -256,8 +256,8 @@ process_array :: proc(slice: []Token) -> (array: Array, ok: bool)
 						append(&array.properties, chunk)
 						i = closing_index
 					case .ARRAY_OPEN:
-						nesting := 1;
-						closing_index := ei + 1;
+						nesting := 1
+						closing_index := ei + 1
 						for j := ei + 1; j < len(slice); j += 1
 						{
 							if slice[j].type == .ARRAY_OPEN
@@ -289,8 +289,8 @@ process_array :: proc(slice: []Token) -> (array: Array, ok: bool)
 				new_val.val = slice[i].value
 				append(&array.properties, new_val)
 			case .CHUNK_OPEN: //Anon Chunk
-				nesting := 1;
-				closing_index := i + 1;
+				nesting := 1
+				closing_index := i + 1
 				for j := closing_index; j < len(slice); j += 1
 				{
 					if slice[j].type == .CHUNK_OPEN
@@ -316,8 +316,8 @@ process_array :: proc(slice: []Token) -> (array: Array, ok: bool)
 				append(&array.properties, chunk)
 				i = closing_index
 			case .ARRAY_OPEN: //Anon Chunks
-				nesting := 1;
-				closing_index := i + 1;
+				nesting := 1
+				closing_index := i + 1
 				for j := closing_index; j < len(slice); j += 1
 				{
 					if slice[j].type == .ARRAY_OPEN
@@ -356,8 +356,8 @@ parse_string :: proc(data: string) -> (doc: ^Document, err: Error)
 	local_data := data
 
 	line_num: u32 = 1
-	inside_array: bool = false;
-	expecting_node_or_array: bool = false;
+	inside_array: bool = false
+	expecting_node_or_array: bool = false
 
 	// Tokenise
 	for line in strings.split_lines_iterator(&local_data) 
@@ -369,9 +369,9 @@ parse_string :: proc(data: string) -> (doc: ^Document, err: Error)
 		for ; x < len(toks); x += 1
 		{
 			tok := toks[x]
-			token: Token;
+			token: Token
 
-			token.value = tok;
+			token.value = tok
 			token.line = line_num
 
 			switch tok
@@ -389,13 +389,13 @@ parse_string :: proc(data: string) -> (doc: ^Document, err: Error)
 				case "":
 					continue
 				case "\"\"":
-					token.type = .VALUE;
+					token.type = .VALUE
 				case: //BUG(fhomolka): There's a bug here, which cannot handle several values in the same line
 					if(strings.contains(tok, "\""))
 					{
 						token.type = .VALUE
 
-						full_value: string;
+						full_value: string
 
 						op := strings.index(trimmed_line, "\"")
 						cl := op + 1
@@ -408,7 +408,7 @@ parse_string :: proc(data: string) -> (doc: ^Document, err: Error)
 
 						token.value = full_value[1:len(full_value)-1]
 
-						f := x + 1;
+						f := x + 1
 						for ; f < len(toks); f += 1 //Progress the token index
 						{
 							if !strings.contains(toks[f], "\"") { continue }
@@ -451,14 +451,14 @@ parse_string :: proc(data: string) -> (doc: ^Document, err: Error)
 				#partial switch doc.tokens[ei].type
 				{
 					case .VALUE:
-						new_val: Value;
+						new_val: Value
 						new_val.name = doc.tokens[i].value
 						new_val.val = doc.tokens[ei].value
 						append(&doc.properties, new_val)
 						i = ei
 					case .CHUNK_OPEN:
-						nesting := 1;
-						closing_index := ei + 1;
+						nesting := 1
+						closing_index := ei + 1
 						for j := closing_index; j < len(doc.tokens); j += 1
 						{
 							if doc.tokens[j].type == .CHUNK_OPEN
@@ -485,8 +485,8 @@ parse_string :: proc(data: string) -> (doc: ^Document, err: Error)
 						append(&doc.properties, new_chunk)
 						i = closing_index
 					case .ARRAY_OPEN:
-						nesting := 1;
-						closing_index := ei + 1;
+						nesting := 1
+						closing_index := ei + 1
 						for j := closing_index; j < len(doc.tokens); j += 1
 						{
 							if doc.tokens[j].type == .ARRAY_OPEN
