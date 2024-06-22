@@ -392,16 +392,16 @@ model_render :: proc(model: ^Model, transform_matrix: glm.mat4, projection_matri
 	}
 }
 
-load_model_m3d :: proc(path: string) -> (^Model, bool)
+load_model_m3d :: proc(path: string) -> bool
 {
 	doc, doc_ok := mdf.load_from_file(path)
 
-	if doc_ok != .NONE do return nil, false
+	if doc_ok != .NONE do return false
 
 	if doc.properties[0].(mdf.Chunk).name != "Mars3DScene"
 	{
 		log.error("%s is not a M3D model!\n", path)
-		return nil, false
+		return false
 	}
 
 	doc_objects := doc.properties[0].(mdf.Chunk).properties["Objects"].(mdf.Array)
@@ -539,7 +539,7 @@ load_model_m3d :: proc(path: string) -> (^Model, bool)
 	//					  Instead of cloning strings
 	mdf.destroy(doc)
 
-	return &g_app.models[path], true
+	return true
 }
 
 load_texture :: proc(path: string)
