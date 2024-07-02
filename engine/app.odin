@@ -179,6 +179,8 @@ app_shutdown :: proc()
 	gl.destroy_uniforms(g_app.screen_shaderuniforms)
 	gl.destroy_uniforms(g_uniforms)
 
+	if g_easy_text_program != 0 do gl.destroy_uniforms(g_easy_text_program_uniforms)
+
 	for _, model in g_app.models
 	{
 		for mesh in model.meshes
