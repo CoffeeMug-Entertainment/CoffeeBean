@@ -401,10 +401,10 @@ model_render :: proc(model: ^Model, transform_matrix: glm.mat4, projection_matri
 			smesh_ref := mesh.submeshes[s]
 
 			gl.ActiveTexture(gl.TEXTURE0)
+			gl.BindTexture(gl.TEXTURE_2D, g_app.textures[smesh_ref.material].ID)
 			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-			gl.BindTexture(gl.TEXTURE_2D, g_app.textures[smesh_ref.material].ID)
-
+			
 			gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, submesh.ebo)
 			gl.DrawElements(gl.TRIANGLES, i32(len(submesh.indices)), gl.UNSIGNED_SHORT, nil)
 		}
