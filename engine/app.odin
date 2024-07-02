@@ -300,6 +300,22 @@ app_render :: proc()
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, g_app.screen_ebo)
 	gl.DrawElements(gl.TRIANGLES, i32(len(SCREEN_EBO)), gl.UNSIGNED_SHORT, nil)
 
+
+	//TODO: Move to game code
+	{
+		font_size :f32: 6
+		text_scale :f32: 2
+
+		text := "DreamRealms - SOME ASSETS ARE PLACEHOLDER AND WILL NOT BE IN THE FINAL GAME"
+		x_start : f32 = cast(f32)(1280 / 2) - (cast(f32)len(text) * (text_scale * font_size) / 2)
+		easy_print(glm.vec3{cast(f32)x_start, 1 + text_scale, text_scale}, text)
+
+		easy_print(glm.vec3{0, 720 - text_scale * font_size - 2, text_scale}, "v0.1.0")
+
+		player := &g_app.entities[1]
+		easy_print(glm.vec3{0, text_scale, text_scale}, fmt.tprintf("%v\n%v\n%v", player.position.x, player.position.y, player.position.z))
+	}
+	
 	SDL.GL_SwapWindow(g_app.window)
 }
 
