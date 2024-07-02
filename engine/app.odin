@@ -745,11 +745,14 @@ player_create :: proc()
 	player.name = "Player"
 	player.flags |= {.PLAYER}
 	player.update = player_update
+	player.position = glm.vec3{0, 56, 0}
 }
+
+import "core:fmt"
 
 player_update :: proc(player: ^Entity)
 {
-	SPEED :: 128.0
+	SPEED :: 30.0
 	move_dir: glm.vec3
 
 	delta_speed := SPEED * g_app.delta_time
