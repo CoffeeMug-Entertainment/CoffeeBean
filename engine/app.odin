@@ -35,6 +35,7 @@ App :: struct
 	//Assets
 	models: map[string]Model,
 	textures: map[string]Texture,
+	fonts: map[string]Font,
 
 	//Input
 	keyboard_state: []u8,
@@ -335,7 +336,7 @@ Submesh :: struct
 	material: string,
 	indices: [dynamic]u16,
 
-	ebo: u32
+	ebo: u32,
 }
 
 Mesh :: struct
@@ -353,7 +354,7 @@ Mesh :: struct
 
 Model :: struct
 {
-	meshes: [dynamic]Mesh
+	meshes: [dynamic]Mesh,
 }
 
 Texture :: struct
@@ -363,7 +364,7 @@ Texture :: struct
 	npp: i32,
 	data: [^]byte,
 
-	ID: u32
+	ID: u32,
 }
 
 model_render :: proc(model: ^Model, transform_matrix: glm.mat4, projection_matrix: glm.mat4, view_matrix: glm.mat4)
