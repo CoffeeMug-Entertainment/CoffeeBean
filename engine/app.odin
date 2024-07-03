@@ -342,14 +342,13 @@ app_render :: proc()
 
 		text := "DreamRealms - SOME ASSETS ARE PLACEHOLDER AND WILL NOT BE IN THE FINAL GAME"
 		x_start : f32 = cast(f32)(1280 / 2) - (cast(f32)len(text) * (text_scale * font_size) / 2)
-		//easy_print(glm.vec3{cast(f32)x_start, 1 + text_scale, text_scale}, text)
 		text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{x_start, 2}, 2, text)
 
-		//easy_print(glm.vec3{0, 720 - text_scale * font_size - 2, text_scale}, "v0.1.0")
+		text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, 720 - text_scale * font_size - 2}, 2, "v0.1.0")
 
 		player := &g_app.entities[1]
-		//easy_print(glm.vec3{0, text_scale, text_scale}, fmt.tprintf("%v\n%v\n%v", player.position.x, player.position.y, player.position.z))
-
+		text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, text_scale}, 2, fmt.tprintf("%v %v %v", player.position.x, player.position.y, player.position.z))
+		free_all(context.temp_allocator)
 	}
 	
 	SDL.GL_SwapWindow(g_app.window)
