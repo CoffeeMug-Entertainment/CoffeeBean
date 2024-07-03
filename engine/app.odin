@@ -347,7 +347,7 @@ app_render :: proc()
 		text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, 720 - text_scale * font_size - 2}, 2, "v0.1.0")
 
 		player := &g_app.entities[1]
-		text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, text_scale}, 2, fmt.tprintf("%v %v %v", player.position.x, player.position.y, player.position.z))
+		text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, text_scale}, 2, fmt.tprintf("%v\n%v\n%v", player.position.x, player.position.y, player.position.z))
 		free_all(context.temp_allocator)
 	}
 	
@@ -726,6 +726,13 @@ text_print :: proc(font_name: string, position: glm.vec2, scale: f32, text: stri
 
 	for c in text
 	{
+		if c == '\n'
+		{
+			y += h * scale
+			x = position.x
+			continue
+		}
+
 		glyph := &font.glyphs[c]
 
 		char_vtx : [4]glm.vec4 =
