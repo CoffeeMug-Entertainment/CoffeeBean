@@ -168,6 +168,32 @@ app_init :: proc() -> bool
 	world_create()
 	player_create()
 
+	// Text Rendering
+
+	//log.info("Compiling text shader")
+	text_program, text_ok := gl.load_shaders_source(VERTEX_TEXT_SRC, FRAGMENT_TEXT_SRC)
+	if !text_ok {log.error("GLSL Error: ", gl.get_last_error_message()); return false}
+
+	g_text_program = text_program
+	g_text_program_uniforms = gl.get_uniforms_from_program(g_text_program)
+	
+
+	gl.GenVertexArrays(1, &quad_vao)
+	gl.BindVertexArray(quad_vao)
+
+	gl.GenBuffers(1, &quad_vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, quad_vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, 4 * size_of(glm.vec4), nil, gl.DYNAMIC_DRAW)
+
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointer(0, 4, gl.FLOAT, false, size_of(glm.vec4), 0)
+
+	gl.GenBuffers(1, &quad_ebo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, quad_ebo)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(quad_idx) * size_of(quad_idx[0]), raw_data(quad_idx), gl.STATIC_DRAW)
+
+	load_font_image("./basegame/fonts/FontCodeMonospace.png")
+
 	g_app.running = true
 
 	return true
@@ -179,7 +205,7 @@ app_shutdown :: proc()
 	gl.destroy_uniforms(g_app.screen_shaderuniforms)
 	gl.destroy_uniforms(g_uniforms)
 
-	if g_easy_text_program != 0 do gl.destroy_uniforms(g_easy_text_program_uniforms)
+	if g_text_program != 0 do gl.destroy_uniforms(g_text_program_uniforms)
 
 	for _, model in g_app.models
 	{
@@ -198,6 +224,12 @@ app_shutdown :: proc()
 		delete(model.meshes)
 	}	
 	delete(g_app.models)
+
+	for _, font in g_app.fonts
+	{
+		delete(font.glyphs)
+	}
+	delete(g_app.fonts)
 
 
 	for _, texture in g_app.textures
@@ -310,12 +342,14 @@ app_render :: proc()
 
 		text := "DreamRealms - SOME ASSETS ARE PLACEHOLDER AND WILL NOT BE IN THE FINAL GAME"
 		x_start : f32 = cast(f32)(1280 / 2) - (cast(f32)len(text) * (text_scale * font_size) / 2)
-		easy_print(glm.vec3{cast(f32)x_start, 1 + text_scale, text_scale}, text)
+		//easy_print(glm.vec3{cast(f32)x_start, 1 + text_scale, text_scale}, text)
+		text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{x_start, 2}, 2, text)
 
-		easy_print(glm.vec3{0, 720 - text_scale * font_size - 2, text_scale}, "v0.1.0")
+		//easy_print(glm.vec3{0, 720 - text_scale * font_size - 2, text_scale}, "v0.1.0")
 
 		player := &g_app.entities[1]
-		easy_print(glm.vec3{0, text_scale, text_scale}, fmt.tprintf("%v\n%v\n%v", player.position.x, player.position.y, player.position.z))
+		//easy_print(glm.vec3{0, text_scale, text_scale}, fmt.tprintf("%v\n%v\n%v", player.position.x, player.position.y, player.position.z))
+
 	}
 	
 	SDL.GL_SwapWindow(g_app.window)
@@ -585,80 +619,136 @@ push_image_to_GPU :: proc(texture_id: string)
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, texture.width, texture.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, &texture.data[0])
 }
 
-import "vendor:stb/easy_font"
-
 VERTEX_TEXT_SRC :: #load("./shaders/default_text_vertex.glsl", string)
 FRAGMENT_TEXT_SRC :: #load("./shaders/default_text_fragment.glsl", string)
-g_easy_text_program: u32
-g_easy_text_program_uniforms: gl.Uniforms
 
-quad_idx : []u16 = { 0, 1, 2, 
-					 0, 2, 3};
+GLYPHS_HORIZONTAL :: 16
+GLYPHS_VERTICAL :: 8
 
+quad_idx : []u16 = 
+{ 
+	0, 1, 2, 
+	0, 2, 3,
+}
+
+quad_vtx : [4]glm.vec3 =
+{
+	glm.vec3{0, 0, 0},
+	glm.vec3{0, 1, 0},
+	glm.vec3{1, 1, 0},
+	glm.vec3{1, 0, 0},
+}
+
+quad_vao: u32
+quad_vbo: u32
 quad_ebo: u32
 
-easy_print :: proc(pos: glm.vec3, text: string)
+g_text_program: u32
+g_text_program_uniforms: gl.Uniforms
+
+Glyph :: struct
 {
-	if quad_ebo == 0
+	uvs : [4]glm.vec2,
+	uv_vbo: u32,
+}
+
+Font :: struct
+{
+	glyphs: map[rune]Glyph,
+	texture: string,
+	
+	u_projection: glm.mat4,
+}
+
+load_font_image :: proc(path: string) -> bool
+{
+	load_texture(path)
+	push_image_to_GPU(path)
+	
+	texture := &g_app.textures[path]
+	new_font : Font 
+	new_font.texture = path
+
+	char_width := texture.width / GLYPHS_HORIZONTAL
+	char_height := texture.height / GLYPHS_VERTICAL
+
+	x : i32 = 0
+	y : i32 = 0
+
+	// Skip first 32 invisible symbols, Start from Space
+	for c in 32..<128
 	{
-		log.info("Creating an easy_text ebo")
-		gl.GenBuffers(1, &quad_ebo)
-		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, quad_ebo)
-		gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(quad_idx) * size_of(quad_idx[0]), raw_data(quad_idx), gl.STATIC_DRAW)
-	}
-
-	if g_easy_text_program == 0
-	{
-		log.info("Compiling easy_text shader")
-		program, ok := gl.load_shaders_source(VERTEX_TEXT_SRC, FRAGMENT_TEXT_SRC)
-		if !ok {log.error("GLSL Error: ", gl.get_last_error_message()); return}
-
-		g_easy_text_program = program
-		g_easy_text_program_uniforms = gl.get_uniforms_from_program(g_easy_text_program)
-	}
-
-	quads: [999]easy_font.Quad = ---
-	colour := easy_font.Color{255, 255, 255, 255}
-	quad_num := easy_font.print_quad_buffer(pos.x, pos.y, text, colour, quads[:], pos.z)
-
-
-	gl.UseProgram(g_easy_text_program)
-	view := glm.mat4LookAt({0, 0, 1}, {0, 0, 0}, {0, 1, 0})
-	u_projection := glm.mat4Ortho3d(0, 1280, 720, 0, 0.5, 1000) * view
-	gl.UniformMatrix4fv(g_easy_text_program_uniforms["u_projection"].location, 1, false, &u_projection[0, 0])
-
-	for quad in quads[:quad_num]
-	{
-		quad_vtx : []glm.vec3 =
+		char := cast(rune)c
+		
+		g : Glyph 
+		g.uvs = 
 		{
-			cast(glm.vec3)quad.tl.v,
-			cast(glm.vec3)quad.bl.v,
-			cast(glm.vec3)quad.br.v,
-			cast(glm.vec3)quad.tr.v,
+			glm.vec2{f32(x) / f32(texture.width), f32(y) / f32(texture.height)},
+			glm.vec2{f32(x) / f32(texture.width), f32(y + char_height) / f32(texture.height)},
+			glm.vec2{f32(x + char_width) / f32(texture.width) , f32(y + char_height) / f32(texture.height)},
+			glm.vec2{f32(x + char_width) / f32(texture.width), f32(y)/ f32(texture.height)},
 		}
 
-		vertex_vao: u32
-		vertex_vbo: u32
-		gl.GenVertexArrays(1, &vertex_vao)
-		gl.BindVertexArray(vertex_vao)
+		new_font.glyphs[char] = g
 
-		gl.GenBuffers(1, &vertex_vbo)
-		gl.BindBuffer(gl.ARRAY_BUFFER, vertex_vbo)
-		gl.BufferData(gl.ARRAY_BUFFER, len(quad_vtx) * size_of(quad_vtx[0]), raw_data(quad_vtx), gl.STATIC_DRAW)
+		x += char_width
 
-		gl.EnableVertexAttribArray(0)
-		gl.VertexAttribPointer(0, 3, gl.FLOAT, false, size_of(glm.vec3), 0)
+		if x >= texture.width 
+		{
+			x = 0
+			y += char_height
+			if y >= texture.width do y = 0
+		}
+	}
+
+	g_app.fonts[path] = new_font
+	return true
+}
+
+text_print :: proc(font_name: string, position: glm.vec2, scale: f32, text: string)
+{
+	gl.UseProgram(g_text_program)
+	gl.BindVertexArray(quad_vao)
+	
+	u_projection := glm.mat4Ortho3d(0, 1280, 720, 0, 0.1, 1000)
+	gl.UniformMatrix4fv(g_text_program_uniforms["u_projection"].location, 1, false, &u_projection[0, 0])
+
+	font := &g_app.fonts[font_name]
+	texture := &g_app.textures[font.texture]
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D, texture.ID)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+	x : f32 = position.x
+	y : f32 = position.y
+	w : f32 = f32(texture.width) / 16.0
+	h : f32 = f32(texture.height) / 8.0
+
+	for c in text
+	{
+		glyph := &font.glyphs[c]
+
+		char_vtx : [4]glm.vec4 =
+		{
+			{x,     y,         glyph.uvs[0].x, glyph.uvs[0].y},
+			{x,     y + h * scale,     glyph.uvs[1].x, glyph.uvs[1].y},
+			{x + w * scale, y + h * scale,     glyph.uvs[2].x, glyph.uvs[2].y},
+			{x + w * scale, y,         glyph.uvs[3].x, glyph.uvs[3].y},
+		}
+		//fmt.println(char_vtx)
+
+		gl.BindBuffer(gl.ARRAY_BUFFER, quad_vbo)
+		gl.BufferSubData(gl.ARRAY_BUFFER, 0, len(char_vtx) * size_of(char_vtx[0]), raw_data(&char_vtx))
+		//gl.DrawArrays(gl.TRIANGLES, 0, 6)
 
 		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, quad_ebo)
 		gl.DrawElements(gl.TRIANGLES, i32(len(quad_idx)), gl.UNSIGNED_SHORT, nil)
 
-		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-		gl.DeleteBuffers(1, &vertex_vbo)
-
-		gl.BindVertexArray(0)
-		gl.DeleteVertexArrays(1, &vertex_vao)
+		x += w * scale
 	}
 }
+
 
 Camera :: struct
 {
