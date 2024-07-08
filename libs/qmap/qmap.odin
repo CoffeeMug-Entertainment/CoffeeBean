@@ -1,0 +1,410 @@
+/* 
+* Quake .map Parser
+* Author: Filip Homolka / @fhomolka
+* License: Public Domain or zlib
+*
+* Clean-room implementation of Quake (1) .map format
+*
+* Original spec by id Software
+*
+* Basic Usage:
+* Get a  ^qmap.Map with
+* doc, ok := qmap.load_from_file("name_of_your_map_file.map")
+* When you're done using it, just call
+* qmap.destroy(doc)
+*
+*/
+
+package qmap
+
+import "core:strings"
+import "core:strconv"
+import "core:os"
+import "core:math/linalg"
+vec3 :: linalg.Vector3f32
+
+
+Map :: struct
+{
+	entities: [dynamic]Entity,
+
+	//tokens: [dynamic]Token
+}
+
+Entity :: struct
+{
+	fields: map[string]string,
+	brushes: [dynamic]Brush,
+}
+
+Brush :: struct
+{
+	faces: [dynamic]Face,
+}
+
+Face :: struct
+{
+	//Parsed from file
+	p1: vec3,
+	p2: vec3,
+	p3: vec3,
+	material: string,
+	x_offset: f32,
+	y_offset: f32,
+	rotation: f32,
+	x_scale: f32,
+	y_scale: f32,
+
+	//Calculated
+	normal: vec3,
+	offset: vec3,
+}
+
+TokenType :: enum
+{
+	NONE,
+	KEY,
+	STRING_VALUE,
+	NUMBER,
+	TEXT_VALUE,
+	BLOCK_OPEN,
+	BLOCK_CLOSE,
+	PAREN_OPEN,
+	PAREN_CLOSE,
+	COMMENT,
+}
+
+Token :: struct
+{
+	type: TokenType,
+	value: string,
+}
+
+import "core:fmt"
+
+parse_string :: proc(str_data: string) -> (^Map, bool)
+{
+	tokens: [dynamic]Token
+	defer delete(tokens)
+	q_map := new(Map)
+
+
+	lines := strings.split(str_data, "\n")
+	defer delete(lines)
+
+	for line in lines
+	{
+		//There's useful metadata in the comments, but we'll skip them for now
+		if strings.has_prefix(line, "//") do continue
+
+		if strings.has_prefix(line, "{")
+		{
+			token: Token
+			token.type = .BLOCK_OPEN
+			token.value = line
+			append(&tokens, token)
+		}
+		else if strings.has_prefix(line, "}")
+		{
+			token: Token
+			token.type = .BLOCK_CLOSE
+			token.value = line
+			append(&tokens, token)
+		}
+		else if strings.has_prefix(line, "\"")
+		{
+			quote_start := 0
+			quote_end := 1
+			for i := 1; i < len(line); i += 1
+			{
+				if line[i] == '\"'
+				{
+					quote_end = i + 1
+					break
+				}
+			}
+
+			key_token: Token
+			key_token.type = .KEY
+			key_token.value = line[quote_start:quote_end]
+
+			quote_start = quote_end + 1
+			quote_end = quote_start + 1
+			for i := quote_end; i < len(line); i += 1
+			{
+				if line[i] == '\"'
+				{
+					quote_end = i + 1
+					break
+				}
+			}
+			value_token: Token
+			value_token.type = .STRING_VALUE
+			value_token.value = line[quote_start:quote_end]
+
+			append(&tokens, key_token)
+			append(&tokens, value_token)
+		}
+		else if strings.has_prefix(line, "(")
+		{
+			splitted := strings.split(line, " ")
+			defer delete(splitted)
+
+			token: Token
+
+			token.value = splitted[0]
+			token.type = .PAREN_OPEN
+			append(&tokens, token)
+
+			token.value = splitted[1]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[2]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[3]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[4]
+			token.type = .PAREN_CLOSE
+			append(&tokens, token)
+
+			token.value = splitted[5]
+			token.type = .PAREN_OPEN
+			append(&tokens, token)
+
+			token.value = splitted[6]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[7]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[8]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[9]
+			token.type = .PAREN_CLOSE
+			append(&tokens, token)
+
+			token.value = splitted[10]
+			token.type = .PAREN_OPEN
+			append(&tokens, token)
+
+			token.value = splitted[11]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[12]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[13]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[14]
+			token.type = .PAREN_CLOSE
+			append(&tokens, token)
+
+			token.value = splitted[15]
+			token.type = .TEXT_VALUE
+			append(&tokens, token)
+
+			token.value = splitted[16]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[17]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[18]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[19]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			token.value = splitted[20]
+			token.type = .NUMBER
+			append(&tokens, token)
+
+			//fmt.println(tokens)
+		}
+	}
+
+	for i := 0; i < len(tokens); i += 1
+	{
+		token := &tokens[i]
+
+		if token.type == .BLOCK_OPEN 
+		{
+			block_start := i
+			block_end := block_start + 1
+
+			nesting := 0
+			for j := block_start; j < len(tokens); j += 1
+			{
+				sub_token := &tokens[j]
+				if sub_token.type == .BLOCK_OPEN
+				{
+					nesting += 1
+					continue
+				}
+				
+				if sub_token.type == .BLOCK_CLOSE
+				{
+					nesting -= 1
+					if nesting == 0
+					{
+						block_end = j + 1
+						break;
+					}
+				}
+			}
+
+			token_slice := tokens[block_start + 1 : block_end - 1]
+			fmt.printf("token_slice\n\tstart: %v\n\tend: %v\n", token_slice[0], token_slice[len(token_slice) - 1])
+
+			entity := process_entity(token_slice)
+			append(&q_map.entities, entity)
+
+			i = block_end - 1
+		}
+	}
+
+	return q_map, true
+}
+
+process_entity :: proc(slice: []Token) -> Entity
+{
+	entity: Entity
+
+	for i := 0; i < len(slice); i += 1
+	{
+		token := &slice[i]
+
+		#partial switch token.type
+		{
+			case .KEY:
+			{
+				value_token := &slice[i + 1]
+				entity.fields[token.value] = value_token.value
+
+				i += 1
+			}
+			case .BLOCK_OPEN: //This is a brush
+			{
+				ofs := 0
+
+				b_close := &slice[i + ofs]
+				for b_close.type != .BLOCK_CLOSE
+				{
+					ofs += 1
+					b_close = &slice[i + ofs]
+				}
+				ofs += 4 //BUG(Fix): What the hell? This should be a + 1 at max, why is it getting .BLOCK_Close before the last 5 numbers?
+
+				brush_slice := slice[i + 1:ofs]
+				fmt.printf("Entity Brushes Slice: \n\t%v \n\t%v\n", brush_slice[0], brush_slice[len(brush_slice) - 1])
+				brush := process_brush(brush_slice)
+
+				append(&entity.brushes, brush)
+
+				i += ofs
+			}
+			case: fmt.println("Did not process: ", token.type)
+		}
+	}
+
+	return entity
+}
+
+process_brush :: proc(slice: []Token) -> Brush
+{
+	brush: Brush
+
+	for i := 0; i < len(slice); i += 1
+	{
+		token := &slice[i]
+
+		#partial switch token.type
+		{
+			case .PAREN_OPEN:
+			{
+				face_slice := slice[i: i + 21]
+				face := process_face(face_slice)
+
+				append(&brush.faces, face)
+				i += 20
+			}
+		}
+	}
+	return brush
+}
+
+process_face :: proc(slice: []Token) -> Face
+{
+	face: Face
+
+	ok: bool
+	face.p1.x, ok = strconv.parse_f32(slice[1].value)
+	face.p1.y, ok = strconv.parse_f32(slice[2].value)
+	face.p1.z, ok = strconv.parse_f32(slice[3].value)
+
+	face.p2.x, ok = strconv.parse_f32(slice[6].value)
+	face.p2.y, ok = strconv.parse_f32(slice[7].value)
+	face.p2.z, ok = strconv.parse_f32(slice[8].value)
+
+	face.p3.x, ok = strconv.parse_f32(slice[11].value)
+	face.p3.y, ok = strconv.parse_f32(slice[12].value)
+	face.p3.z, ok = strconv.parse_f32(slice[13].value)
+
+	face.material = slice[15].value
+
+	face.x_offset, ok = strconv.parse_f32(slice[16].value)
+	face.y_offset, ok = strconv.parse_f32(slice[17].value)
+	face.rotation, ok = strconv.parse_f32(slice[18].value)
+	face.x_scale, ok = strconv.parse_f32(slice[19].value)
+	face.y_scale, ok = strconv.parse_f32(slice[20].value)
+
+	return face
+}
+
+load_from_file :: proc(path: string) -> (^Map, bool)
+{
+	data, ok := os.read_entire_file(path)
+	defer delete(data)
+
+	if !ok do return nil, false
+
+	str_data := strings.clone(string(data))
+	defer delete(str_data)
+
+	return parse_string(str_data)
+}
+
+destroy :: proc(q_map: ^Map)
+{
+	if q_map == nil do return
+
+	for entity in q_map.entities
+	{
+		delete(entity.fields)
+		for brush in entity.brushes
+		{
+			delete(brush.faces)
+		}
+		delete(entity.brushes)
+	}
+	delete(q_map.entities)
+
+	free(q_map)
+}
