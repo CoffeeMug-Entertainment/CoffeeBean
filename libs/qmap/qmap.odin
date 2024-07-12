@@ -57,7 +57,7 @@ Face :: struct
 
 	//Calculated
 	normal: vec3,
-	offset: vec3,
+	distance: vec3,
 }
 
 TokenType :: enum
@@ -374,6 +374,12 @@ process_face :: proc(slice: []Token) -> Face
 	face.rotation, ok = strconv.parse_f32(slice[18].value)
 	face.x_scale, ok = strconv.parse_f32(slice[19].value)
 	face.y_scale, ok = strconv.parse_f32(slice[20].value)
+
+	//Calculate unstored data
+	face.normal = linalg.cross(face.p3 - face.p1, face.p2 - face.p1)
+	face.normal = linalg.normalize(face.normal)
+
+	face.distance = -linalg.dot(face.normal, face.p1)	
 
 	return face
 }
