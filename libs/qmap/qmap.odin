@@ -316,7 +316,7 @@ process_entity :: proc(slice: []Token) -> Entity
 					ofs += 1
 					b_close = &slice[i + ofs]
 				}
-				ofs += 4 //BUG(Fix): What the hell? This should be a + 1 at max, why is it getting .BLOCK_Close before the last 5 numbers?
+				ofs += 2 //BUG(Fix): What the hell? This should be a + 1 at max, why is it getting .BLOCK_Close before the last 5 numbers?
 
 				brush_slice := slice[i + 1:ofs]
 				fmt.printf("Entity Brushes Slice: \n\t%v \n\t%v\n", brush_slice[0], brush_slice[len(brush_slice) - 1])
