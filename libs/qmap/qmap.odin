@@ -40,6 +40,7 @@ Entity :: struct
 Brush :: struct
 {
 	faces: [dynamic]Face,
+	polys: [dynamic]Poly,
 }
 
 Face :: struct
@@ -59,6 +60,10 @@ Face :: struct
 	normal: vec3,
 	distance: f32,
 }
+
+Poly :: struct
+{
+	vertices: [dynamic]vec3,
 }
 
 TokenType :: enum
@@ -325,6 +330,12 @@ process_entity :: proc(slice: []Token) -> Entity
 		}
 	}
 
+	for b, i in entity.brushes
+	{
+		brush := &entity.brushes[i]
+		create_vertices(brush)
+	}
+	
 	return entity
 }
 
@@ -385,6 +396,72 @@ process_face :: proc(slice: []Token) -> Face
 	return face
 }
 
+intersect_3faces :: proc(first, second, third: Face) -> (vec3, bool)
+{
+	denom := linalg.dot(first.normal, linalg.cross(second.normal, third.normal))
+
+	if denom < 0.001
+	{
+		return vec3{0, 0, 0}, false
+	}
+
+	vec := (linalg.cross(third.normal, second.normal) * first.distance - 
+			(linalg.cross(third.normal, first.normal)) * second.distance - 
+			(linalg.cross(first.normal, second.normal)) * third.distance) / denom
+
+	return vec, true
+}
+
+create_vertices :: proc(brush: ^Brush)
+{
+	for i in 0..<len(brush.faces)
+	{
+		t_poly : Poly
+		append(&brush.polys, t_poly)
+		new_poly := &brush.polys[i]
+		for j in 0..<len(brush.faces)
+		{
+			for k in 0..<len(brush.faces)
+			{
+				if i == j || i == k || j == k {continue}
+
+				new_vtx, ok := intersect_3faces(brush.faces[i], brush.faces[j], brush.faces[k])
+				if !ok {continue}
+				invalid := false
+				for m in 0..<len(brush.faces)
+				{
+					if linalg.dot(brush.faces[m].normal, new_vtx) + brush.faces[m].distance > 0.001
+					{
+						invalid = true
+						break
+					}
+				}
+
+				if invalid {continue}
+
+				//HACK(Fix): The real solution would be to check why they happen in the first place
+				//TODO(Fix): Check why do duplicate vertices happen
+				DUPLICATE_PROTECTION :: true
+				when DUPLICATE_PROTECTION
+				{
+					duplicate := false
+					for vtx in new_poly.vertices
+					{
+						if linalg.distance(new_vtx, vtx) > 0.001 {continue}
+
+						duplicate = true
+						break
+					}
+
+					if duplicate {continue}
+				}
+				
+				append(&new_poly.vertices, new_vtx)
+			}
+		}
+	}
+}
+
 load_from_file :: proc(path: string) -> (^Map, bool)
 {
 	data, ok := os.read_entire_file(path)
@@ -408,6 +485,11 @@ destroy :: proc(q_map: ^Map)
 		for brush in entity.brushes
 		{
 			delete(brush.faces)
+			for poly in brush.polys
+			{
+				delete(poly.vertices)
+			}
+			delete(brush.polys)
 		}
 		delete(entity.brushes)
 	}
