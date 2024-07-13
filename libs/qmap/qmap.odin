@@ -57,7 +57,8 @@ Face :: struct
 
 	//Calculated
 	normal: vec3,
-	distance: vec3,
+	distance: f32,
+}
 }
 
 TokenType :: enum
