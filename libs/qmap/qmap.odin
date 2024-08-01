@@ -24,6 +24,8 @@ import "core:math/linalg"
 vec3 :: linalg.Vector3f32
 
 
+EPSILON :: 0.001
+
 Map :: struct
 {
 	entities: [dynamic]Entity,
@@ -64,6 +66,7 @@ Face :: struct
 Poly :: struct
 {
 	vertices: [dynamic]vec3,
+	indices: [dynamic]u16
 }
 
 TokenType :: enum
@@ -277,7 +280,7 @@ parse_string :: proc(str_data: string) -> (^Map, bool)
 			}
 
 			token_slice := tokens[block_start + 1 : block_end - 1]
-			fmt.printf("token_slice\n\tstart: %v\n\tend: %v\n", token_slice[0], token_slice[len(token_slice) - 1])
+			//fmt.printf("token_slice\n\tstart: %v\n\tend: %v\n", token_slice[0], token_slice[len(token_slice) - 1])
 
 			entity := process_entity(token_slice)
 			append(&q_map.entities, entity)
@@ -319,7 +322,7 @@ process_entity :: proc(slice: []Token) -> Entity
 				ofs += 2 //BUG(Fix): What the hell? This should be a + 1 at max, why is it getting .BLOCK_Close before the last 5 numbers?
 
 				brush_slice := slice[i + 1:ofs]
-				fmt.printf("Entity Brushes Slice: \n\t%v \n\t%v\n", brush_slice[0], brush_slice[len(brush_slice) - 1])
+				//fmt.printf("Entity Brushes Slice: \n\t%v \n\t%v\n", brush_slice[0], brush_slice[len(brush_slice) - 1])
 				brush := process_brush(brush_slice)
 
 				append(&entity.brushes, brush)
@@ -334,6 +337,20 @@ process_entity :: proc(slice: []Token) -> Entity
 	{
 		brush := &entity.brushes[i]
 		create_vertices(brush)
+		sort_vertices(brush);
+
+		for p, i in brush.polys
+		{
+			poly := &brush.polys[i]
+			
+			//Generate tri-fans, because that's the simplest
+			for f in 1..<u16(len(poly.vertices) - 1)
+			{
+				append(&poly.indices, 0)
+				append(&poly.indices, f)
+				append(&poly.indices, f + 1)
+			}	
+		}
 	}
 	
 	return entity
@@ -400,7 +417,7 @@ intersect_3faces :: proc(first, second, third: Face) -> (vec3, bool)
 {
 	denom := linalg.dot(first.normal, linalg.cross(second.normal, third.normal))
 
-	if denom < 0.001
+	if denom < EPSILON
 	{
 		return vec3{0, 0, 0}, false
 	}
@@ -430,7 +447,7 @@ create_vertices :: proc(brush: ^Brush)
 				invalid := false
 				for m in 0..<len(brush.faces)
 				{
-					if linalg.dot(brush.faces[m].normal, new_vtx) + brush.faces[m].distance > 0.001
+					if linalg.dot(brush.faces[m].normal, new_vtx) + brush.faces[m].distance > EPSILON
 					{
 						invalid = true
 						break
@@ -447,7 +464,7 @@ create_vertices :: proc(brush: ^Brush)
 					duplicate := false
 					for vtx in new_poly.vertices
 					{
-						if linalg.distance(new_vtx, vtx) > 0.001 {continue}
+						if linalg.distance(new_vtx, vtx) > EPSILON {continue}
 
 						duplicate = true
 						break
@@ -458,6 +475,60 @@ create_vertices :: proc(brush: ^Brush)
 				
 				append(&new_poly.vertices, new_vtx)
 			}
+		}
+	}
+}
+
+sort_vertices :: proc(brush: ^Brush)
+{
+	for i in 0..<len(brush.polys)
+	{
+		poly := &brush.polys[i]
+		center_vtx : vec3
+		for vtx in brush.polys[i].vertices
+		{
+			center_vtx += vtx
+		}
+		center_vtx /= cast(f32)len(brush.polys[i].vertices)
+		
+		for v_idx in 0..<len(poly.vertices) - 2
+		{
+			vtx := poly.vertices[v_idx]
+			a := linalg.normalize(vtx - center_vtx)
+
+			//We would've done (brush.faces[i].normal + center_vtx) - center_vtx here, but that's stupid
+			tri_plane_normal := linalg.cross(brush.faces[i].normal, a - center_vtx)
+			tri_plane_normal = linalg.normalize(tri_plane_normal)
+			tri_plane_distance := -linalg.dot(tri_plane_normal, a)
+
+			smallest_angle : f32 = -1
+			smallest_vtx_idx := -1
+
+			for v_j in 0..<len(poly.vertices)
+			{
+				other_vtx := poly.vertices[v_j]
+				distance_from_plane := linalg.dot(tri_plane_normal, other_vtx)
+
+				if distance_from_plane < -EPSILON {continue} // < for CW, > for CCW
+
+				b := poly.vertices[v_j] - center_vtx
+				b = linalg.normalize(b)
+
+				angle : f32 = linalg.dot(a, b)
+				if angle > smallest_angle
+				{
+					smallest_angle = angle
+					smallest_vtx_idx = v_j
+				}
+			}
+
+			if smallest_vtx_idx == -1
+			{
+				fmt.println("Invalid polygon!")
+				continue
+			}
+
+			poly.vertices[smallest_vtx_idx], poly.vertices[v_idx + 1] = poly.vertices[v_idx + 1], poly.vertices[smallest_vtx_idx]
 		}
 	}
 }
