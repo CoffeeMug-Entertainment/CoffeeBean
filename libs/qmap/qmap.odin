@@ -559,6 +559,7 @@ destroy :: proc(q_map: ^Map)
 			for poly in brush.polys
 			{
 				delete(poly.vertices)
+				delete(poly.indices)
 			}
 			delete(brush.polys)
 		}
