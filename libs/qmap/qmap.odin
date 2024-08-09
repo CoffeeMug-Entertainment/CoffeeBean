@@ -22,6 +22,7 @@ import "core:strconv"
 import "core:os"
 import "core:math/linalg"
 vec3 :: linalg.Vector3f32
+vec2 :: linalg.Vector2f32
 
 
 EPSILON :: 0.001
