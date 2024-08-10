@@ -67,6 +67,7 @@ Face :: struct
 Poly :: struct
 {
 	vertices: [dynamic]vec3,
+	uvs: [dynamic]vec2,
 	indices: [dynamic]u16
 }
 
@@ -485,12 +486,15 @@ sort_vertices :: proc(brush: ^Brush)
 	for i in 0..<len(brush.polys)
 	{
 		poly := &brush.polys[i]
+		//fmt.println("Pre-sorting: ", poly.vertices)
+		//defer fmt.println("post-sorting: ", poly.vertices)
+
 		center_vtx : vec3
-		for vtx in brush.polys[i].vertices
+		for vtx in poly.vertices
 		{
 			center_vtx += vtx
 		}
-		center_vtx /= cast(f32)len(brush.polys[i].vertices)
+		center_vtx /= f32(len(brush.polys[i].vertices))
 		
 		for v_idx in 0..<len(poly.vertices) - 2
 		{
@@ -505,7 +509,7 @@ sort_vertices :: proc(brush: ^Brush)
 			smallest_angle : f32 = -1
 			smallest_vtx_idx := -1
 
-			for v_j in 0..<len(poly.vertices)
+			for v_j in v_idx + 1..<len(poly.vertices)
 			{
 				other_vtx := poly.vertices[v_j]
 				distance_from_plane := linalg.dot(tri_plane_normal, other_vtx)
