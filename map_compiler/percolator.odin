@@ -7,6 +7,9 @@ import "core:fmt"
 import "core:os"
 import "core:strings"
 import "core:math/linalg"
+import "core:math"
+
+import stbi "vendor:stb/image"
 
 output_filename : string
 output_extension: string = ".cbm"
@@ -102,6 +105,77 @@ main :: proc()
 	//NOTE(Fix): lmao
 	context.allocator = context.temp_allocator
 
+	//TEMP(Fix): Calculate UVs
+	// I couldn't put this in qmap, because I don't know how to calculate UVs without texture size
+	{
+		for brush in doc.entities[0].brushes
+		{
+			for poly, idx in brush.polys
+			{
+				poly := &brush.polys[idx]
+				face := &brush.faces[idx]
+				material := face.material
+				if !strings.contains(material, "/")
+				{
+					temp_path := fmt.tprintf("./basegame/textures/%v.tga", material) //TODO(Fix): Not hardcoded gamepath
+					face.material = strings.clone(temp_path)
+				}
+
+				material_width: i32
+				material_height: i32
+				material_bpp: i32
+				decoded := stbi.info(fmt.ctprint(face.material), &material_width, &material_height, &material_bpp)
+				if decoded != 1
+				{
+					log.errorf("Could not find material: %v\n", face.material)
+				}
+
+
+				for vtx in poly.vertices
+				{
+					uv : qmap.vec2
+					defer append(&poly.uvs, uv)
+
+					dot_n_up := linalg.abs(linalg.dot(face.normal, qmap.vec3{0, 0, 1}))
+					dot_n_rt := linalg.abs(linalg.dot(face.normal, qmap.vec3{0, 1, 0}))
+					dot_n_fw := linalg.abs(linalg.dot(face.normal, qmap.vec3{0, 1, 0}))
+
+					if dot_n_up >= dot_n_rt && dot_n_up >= dot_n_fw
+					{
+						uv.x = vtx.x
+						uv.y = -vtx.y
+					}
+					else if dot_n_rt >= dot_n_up && dot_n_rt >= dot_n_fw
+					{
+						uv.x = vtx.x
+						uv.y = -vtx.z
+					}
+					else if dot_n_fw >= dot_n_up && dot_n_fw >= dot_n_rt
+					{
+						uv.x = vtx.y
+						uv.y = -vtx.z
+					}
+					// else print warning?
+
+					rad_rot := face.rotation * linalg.RAD_PER_DEG
+					rotated_uv : qmap.vec2
+					rotated_uv.x = (uv.x * linalg.cos(rad_rot) - uv.y * linalg.sin(rad_rot))
+					rotated_uv.y = (uv.x * linalg.sin(rad_rot) + uv.y * linalg.cos(rad_rot))
+					uv = rotated_uv
+
+					uv.x /= f32(material_width)
+					uv.y /= f32(material_height)
+
+					uv.x /= face.x_scale
+					uv.y /= face.y_scale
+
+					uv.x += face.x_offset / f32(material_width)
+					uv.y += face.y_offset / f32(material_height)
+				}
+			}
+		}
+	}
+
 	if make_mars_3d
 	{
 		mars_scene : Mars3DScene
@@ -111,17 +185,38 @@ main :: proc()
 			mesh.local_transform = linalg.identity_matrix(type_of(mesh.local_transform))
 			defer append(&mars_scene.objects, mesh)
 
-			for poly in brush.polys
+			for poly, poly_idx in brush.polys
 			{
 				submesh: Mars3DSubmesh
 				defer append(&mesh.submeshes, submesh)
+				submesh.material = brush.faces[poly_idx].material
 
 				//TODO(Fix): No duplicate vertices, sort indices
-				for vtx in poly.vertices
+				poly_vtxes: for vtx, poly_vtx_idx in poly.vertices
 				{
+					for mesh_vtx, mesh_vtx_idx in mesh.vertices
+					{
+						if linalg.distance(vtx, mesh_vtx) > qmap.EPSILON do continue
+
+						continue poly_vtxes
+					}
+					
 					append(&mesh.vertices, vtx)
-					append(&mesh.uvs, qmap.vec2{0, 0})
-					append(&submesh.indices, u16(len(mesh.vertices) - 1))
+					append(&mesh.uvs, poly.uvs[poly_vtx_idx])
+					
+				}
+
+				for vtx_idx in poly.indices
+				{
+					poly_vtx := poly.vertices[vtx_idx]
+
+					for mesh_vtx, mesh_vtx_idx in mesh.vertices
+					{
+						if linalg.distance(poly_vtx, mesh_vtx) > qmap.EPSILON do continue
+						
+						append(&submesh.indices, u16(mesh_vtx_idx))
+						break
+					}
 				}
 			}
 		}
