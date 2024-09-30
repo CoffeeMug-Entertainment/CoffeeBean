@@ -331,7 +331,7 @@ process_entity :: proc(slice: []Token) -> Entity
 
 				i += ofs - 1
 			}
-			case: fmt.println("Did not process: ", token.type)
+			case: fmt.println("Did not process: ", token.type, token.value)
 		}
 	}
 
