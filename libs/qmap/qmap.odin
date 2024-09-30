@@ -486,6 +486,7 @@ sort_vertices :: proc(brush: ^Brush)
 	for i in 0..<len(brush.polys)
 	{
 		poly := &brush.polys[i]
+		face := &brush.faces[i]
 		//fmt.println("Pre-sorting: ", poly.vertices)
 		//defer fmt.println("post-sorting: ", poly.vertices)
 
@@ -494,7 +495,7 @@ sort_vertices :: proc(brush: ^Brush)
 		{
 			center_vtx += vtx
 		}
-		center_vtx /= f32(len(brush.polys[i].vertices))
+		center_vtx /= f32(len(poly.vertices))
 		
 		for v_idx in 0..<len(poly.vertices) - 2
 		{
@@ -502,7 +503,7 @@ sort_vertices :: proc(brush: ^Brush)
 			a := linalg.normalize(vtx - center_vtx)
 
 			//We would've done (brush.faces[i].normal + center_vtx) - center_vtx here, but that's stupid
-			tri_plane_normal := linalg.cross(brush.faces[i].normal, a - center_vtx)
+			tri_plane_normal := linalg.cross(face.normal, a - center_vtx)
 			tri_plane_normal = linalg.normalize(tri_plane_normal)
 			tri_plane_distance := -linalg.dot(tri_plane_normal, a)
 
