@@ -138,7 +138,7 @@ main :: proc()
 
 					dot_n_up := linalg.abs(linalg.dot(face.normal, qmap.vec3{0, 0, 1}))
 					dot_n_rt := linalg.abs(linalg.dot(face.normal, qmap.vec3{0, 1, 0}))
-					dot_n_fw := linalg.abs(linalg.dot(face.normal, qmap.vec3{0, 1, 0}))
+					dot_n_fw := linalg.abs(linalg.dot(face.normal, qmap.vec3{1, 0, 0}))
 
 					if dot_n_up >= dot_n_rt && dot_n_up >= dot_n_fw
 					{
