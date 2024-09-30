@@ -232,7 +232,7 @@ main :: proc()
 			for object in mars_scene.objects
 			{
 				strings.write_string(&str_builder, "Mesh = \n{\n")
-				defer strings.write_string(&str_builder, "\n}")
+				defer strings.write_string(&str_builder, "\n}\n\n")
 				strings.write_string(&str_builder, fmt.tprintf("Name = \"%v\"\n", object.name))
 				strings.write_string(&str_builder, "LocalTransform = \"")
 				//HACK(Fix): We can't iterate over a matrix, so i'm abusing Odin's fmt here
