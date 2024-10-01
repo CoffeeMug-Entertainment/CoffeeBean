@@ -331,7 +331,7 @@ process_entity :: proc(slice: []Token) -> Entity
 
 				i += ofs - 1
 			}
-			case: fmt.println("Did not process: ", token.type, token.value)
+			case: fmt.println("[QMAP] Did not process: ", token.type, token.value)
 		}
 	}
 
@@ -531,7 +531,7 @@ sort_vertices :: proc(brush: ^Brush)
 
 			if smallest_vtx_idx == -1
 			{
-				fmt.println("Invalid polygon!")
+				fmt.println("[QMAP] Invalid polygon!")
 				continue
 			}
 
