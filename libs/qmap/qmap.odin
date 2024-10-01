@@ -481,6 +481,7 @@ create_vertices :: proc(brush: ^Brush)
 	}
 }
 
+
 sort_vertices :: proc(brush: ^Brush)
 {
 	for i in 0..<len(brush.polys)
@@ -502,10 +503,10 @@ sort_vertices :: proc(brush: ^Brush)
 			vtx := poly.vertices[v_idx]
 			a := linalg.normalize(vtx - center_vtx)
 
-			//We would've done (brush.faces[i].normal + center_vtx) - center_vtx here, but that's stupid
-			tri_plane_normal := linalg.cross(face.normal, a - center_vtx)
+			//We would've done (face.normal + center_vtx) - center_vtx here, but that's stupid
+			tri_plane_normal := linalg.cross(face.normal, vtx - center_vtx)
 			tri_plane_normal = linalg.normalize(tri_plane_normal)
-			tri_plane_distance := -linalg.dot(tri_plane_normal, a)
+			tri_plane_distance := -linalg.dot(tri_plane_normal, vtx)
 
 			smallest_angle : f32 = -1
 			smallest_vtx_idx := -1
@@ -513,7 +514,7 @@ sort_vertices :: proc(brush: ^Brush)
 			for v_j in v_idx + 1..<len(poly.vertices)
 			{
 				other_vtx := poly.vertices[v_j]
-				distance_from_plane := linalg.dot(tri_plane_normal, other_vtx)
+				distance_from_plane := linalg.dot(face.normal, other_vtx) + face.distance
 
 				if distance_from_plane < -EPSILON {continue} // < for CW, > for CCW
 
