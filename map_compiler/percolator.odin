@@ -67,6 +67,11 @@ main :: proc()
 		output_filename = fmt.tprint(split_path[0], output_extension, sep="")
 	}
 
+	if !strings.contains(output_filename, ".")
+	{
+		output_filename = fmt.tprintf("%s%s", output_filename, output_extension)
+	}
+
 	logger := log.create_console_logger()
 	defer log.destroy_console_logger(logger)
 	context.logger = logger
