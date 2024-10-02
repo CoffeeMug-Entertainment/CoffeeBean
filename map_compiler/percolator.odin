@@ -133,17 +133,21 @@ main :: proc()
 				if decoded != 1
 				{
 					log.errorf("Could not find material: %v\n", face.material)
+					//HACK(Fix): Make assumptions since we don't have this info
+					material_width = 128
+					material_height = 128
 				}
 
+				dot_n_up := linalg.abs(linalg.dot(face.normal, qmap.vec3{0, 0, 1}))
+				dot_n_rt := linalg.abs(linalg.dot(face.normal, qmap.vec3{0, 1, 0}))
+				dot_n_fw := linalg.abs(linalg.dot(face.normal, qmap.vec3{1, 0, 0}))
+
+				rad_rot := face.rotation * linalg.RAD_PER_DEG
 
 				for vtx in poly.vertices
 				{
 					uv : qmap.vec2
 					defer append(&poly.uvs, uv)
-
-					dot_n_up := linalg.abs(linalg.dot(face.normal, qmap.vec3{0, 0, 1}))
-					dot_n_rt := linalg.abs(linalg.dot(face.normal, qmap.vec3{0, 1, 0}))
-					dot_n_fw := linalg.abs(linalg.dot(face.normal, qmap.vec3{1, 0, 0}))
 
 					if dot_n_up >= dot_n_rt && dot_n_up >= dot_n_fw
 					{
@@ -160,9 +164,11 @@ main :: proc()
 						uv.x = vtx.y
 						uv.y = -vtx.z
 					}
-					// else print warning?
+					else
+					{
+						log.warnf("Somehow, normal (dot) u/r/f are all the same but also different. Hell has frozen over.")
+					}
 
-					rad_rot := face.rotation * linalg.RAD_PER_DEG
 					rotated_uv : qmap.vec2
 					rotated_uv.x = (uv.x * linalg.cos(rad_rot) - uv.y * linalg.sin(rad_rot))
 					rotated_uv.y = (uv.x * linalg.sin(rad_rot) + uv.y * linalg.cos(rad_rot))
