@@ -166,7 +166,7 @@ main :: proc()
 					}
 					else
 					{
-						log.warnf("Somehow, normal (dot) u/r/f are all the same but also different. Hell has frozen over.")
+						log.warnf("Somehow, angles between up,rt,fw are all the same but also different. Hell has frozen over.")
 					}
 
 					rotated_uv : qmap.vec2
