@@ -22,6 +22,7 @@ print_usage :: #force_inline proc()
 
 main :: proc()
 {
+	defer free_all(context.temp_allocator)
 	// process args
 	if len(os.args) < 2
 	{
@@ -295,9 +296,8 @@ main :: proc()
 			strings.write_string(&str_builder, "\n]\n")
 		}
 		os.write_string(output_file, strings.to_string(str_builder))
+		return
 	}
-
-	free_all(context.temp_allocator)
 }
 
 
