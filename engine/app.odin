@@ -104,7 +104,7 @@ app_init :: proc() -> bool
 
 	/*
 	gl.Enable(gl.CULL_FACE)
-	gl.CullFace(gl.FRONT)
+	gl.CullFace(gl.BACK)
 	*/
 
 	//Framebuffer
@@ -202,9 +202,6 @@ app_init :: proc() -> bool
 
 		g_app.game_ui = cast(proc())dynlib.symbol_address(g_app.game, "game_ui")
 	}
-
-	//world_create()
-	//player_create()
 
 	// Text Rendering
 
@@ -770,10 +767,10 @@ screen_print :: proc(font_name: string, position: glm.vec2, scale: f32, text: st
 
 		char_vtx : [4]glm.vec4 =
 		{
-			{x,     y,         glyph.uvs[0].x, glyph.uvs[0].y},
-			{x,     y + h * scale,     glyph.uvs[1].x, glyph.uvs[1].y},
-			{x + w * scale, y + h * scale,     glyph.uvs[2].x, glyph.uvs[2].y},
-			{x + w * scale, y,         glyph.uvs[3].x, glyph.uvs[3].y},
+			{x,				y,			   glyph.uvs[0].x, glyph.uvs[0].y},
+			{x,				y + h * scale, glyph.uvs[1].x, glyph.uvs[1].y},
+			{x + w * scale, y + h * scale, glyph.uvs[2].x, glyph.uvs[2].y},
+			{x + w * scale, y,			   glyph.uvs[3].x, glyph.uvs[3].y},
 		}
 		//fmt.println(char_vtx)
 

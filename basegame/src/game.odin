@@ -10,9 +10,6 @@ ei : shared.EngineInterface
 @(export)
 game_init :: proc(engine_interface: shared.EngineInterface)
 {
-
-	fmt.println("Hello, from game")
-
 	ei = engine_interface
 
 	world_create()
