@@ -1,6 +1,7 @@
 package CBE
 
 import "libs:mdf"
+import "../shared"
 
 import glm "core:math/linalg/glsl"
 import SDL "vendor:sdl2"
@@ -10,6 +11,8 @@ import stbi "vendor:stb/image"
 import "core:log"
 import "core:strings"
 import "core:strconv"
+import "core:dynlib"
+import "core:fmt"
 
 TARGET_FPS :: 60
 TARGET_FRAMETIME :f32: 1000/TARGET_FPS
@@ -42,8 +45,11 @@ App :: struct
 	last_keyboard_state: []u8,
 
 	//Entities
-	entities: [1024]Entity,
+	entities: [1024]shared.Entity,
 	entity_count: u32,
+
+	//Gamecode
+	game: dynlib.Library
 }
 
 g_program : u32
@@ -165,8 +171,29 @@ app_init :: proc() -> bool
 		en.update = nil
 	}
 
-	world_create()
-	player_create()
+	//Gamecode
+	GAMECODE_PATH :: "basegame/game.so"
+	gamecode_loaded: bool
+	g_app.game, gamecode_loaded = dynlib.load_library(GAMECODE_PATH)
+	if !gamecode_loaded {log.errorf("Failed to load gamecode: %v\n", GAMECODE_PATH)}
+
+	game_init := cast(proc(shared.EngineInterface))dynlib.symbol_address(g_app.game, "game_init")
+
+	if game_init == nil {log.errorf("Failed to find game_init inside %v\n", GAMECODE_PATH)}
+	else 
+	{
+		ei : shared.EngineInterface
+		ei.entity_create = entity_create
+		ei.load_model_m3d = load_model_m3d
+		ei.key_down = key_down
+		ei.key_pressed = key_pressed
+		ei.camera = &g_camera
+		ei.delta_time = &g_app.delta_time
+		game_init(ei)
+	}
+
+	//world_create()
+	//player_create()
 
 	// Text Rendering
 
@@ -749,18 +776,7 @@ text_print :: proc(font_name: string, position: glm.vec2, scale: f32, text: stri
 	}
 }
 
-
-Camera :: struct
-{
-	position: glm.vec3,
-	rotation: glm.vec3,
-	target: glm.vec3,
-	up: glm.vec3,
-	right: glm.vec3,
-	forward: glm.vec3,
-}
-
-g_camera: Camera
+g_camera: shared.Camera
 
 camera_move :: proc(dir: glm.vec3)
 {
@@ -788,30 +804,7 @@ camera_rotate :: proc(dir: glm.vec2)
 	up = glm.normalize(glm.cross(right, forward))
 }
 
-EntityFlagsEnum :: enum u32
-{
-	VALID,
-	RENDERABLE,
-	PHYSICS,
-	PLAYER,
-}
-
-EntityFlagsSet :: bit_set[EntityFlagsEnum; u32]
-
-Entity :: struct
-{
-	flags: EntityFlagsSet,
-	name: string,
-	position: glm.vec3,
-	rotation: glm.vec3,
-	velocity: glm.vec3,
-
-	model: string,
-
-	update: proc(^Entity),
-}
-
-entity_create :: proc() -> ^Entity
+entity_create :: proc() -> ^shared.Entity
 {
 	en := &g_app.entities[g_app.entity_count]
 	en.flags |= {.VALID}
@@ -821,7 +814,7 @@ entity_create :: proc() -> ^Entity
 	return en
 }
 
-entity_render :: proc(en: ^Entity, view_matrix: glm.mat4, proj_matrix: glm.mat4)
+entity_render :: proc(en: ^shared.Entity, view_matrix: glm.mat4, proj_matrix: glm.mat4)
 {
 	transform_matrix := glm.identity(glm.mat4)
 	transform_matrix += glm.mat4Translate(en.position)
@@ -832,78 +825,6 @@ entity_render :: proc(en: ^Entity, view_matrix: glm.mat4, proj_matrix: glm.mat4)
 	model := &g_app.models[en.model]
 	model_render(model, transform_matrix, proj_matrix, view_matrix)
 	
-}
-
-
-// TODO(Fix): Put in gamecode
-WORLD_MODEL :: "./basegame/maps/test.m3d"
-//WORLD_MODEL :: "./basegame/models/map.m3d"
-
-world_create :: proc()
-{
-	load_model_m3d(WORLD_MODEL)
-
-	world := entity_create()
-	world.model = WORLD_MODEL
-	world.name = "World"
-	world.flags |= {.RENDERABLE}
-	if strings.contains(WORLD_MODEL, ".m3d") do world.rotation.x = -90 //TEMP hackery, lol
-	//world.rotation.x = -90
-}
-
-player_create :: proc()
-{
-	player := entity_create()
-	player.name = "Player"
-	player.flags |= {.PLAYER}
-	player.update = player_update
-	player.position = glm.vec3{0, 56, 0}
-}
-
-import "core:fmt"
-
-player_update :: proc(player: ^Entity)
-{
-	SPEED :: 320.0
-	move_dir: glm.vec3
-
-	delta_speed := SPEED * g_app.delta_time
-	if key_down(.LSHIFT) 
-	{
-		delta_speed *= 10	
-	}
-
-	if key_down(.A)
-	{
-		move_dir -= g_camera.right * delta_speed
-	}
-	if key_down(.D)
-	{
-		move_dir += g_camera.right * delta_speed
-	}
-
-	if key_down(.W)
-	{
-		move_dir += g_camera.forward * delta_speed
-	}
-	if key_down(.S)
-	{
-		move_dir -= g_camera.forward * delta_speed
-	}
-	
-	if key_down(.SPACE)
-	{
-		move_dir += g_camera.up * delta_speed
-	}
-	if key_down(.C)
-	{
-		move_dir -= g_camera.up * delta_speed
-	}
-
-	player.position += move_dir
-
-	g_camera.position = player.position
-	//g_camera.rotation = player.rotation
 }
 
 //TEMP(Fix): Move to game code
