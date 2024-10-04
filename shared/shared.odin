@@ -35,6 +35,8 @@ EngineInterface :: struct
 
 	delta_time : ^f32,
 	camera: ^Camera,
+	screen_print: proc(font_name: string, position: glm.vec2, scale: f32, text: string),
+	screen_tprintf: proc(font_name: string, position: glm.vec2, scale: f32, format: string, args : ..any),
 }
 
 Camera :: struct

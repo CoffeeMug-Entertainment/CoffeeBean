@@ -49,7 +49,8 @@ App :: struct
 	entity_count: u32,
 
 	//Gamecode
-	game: dynlib.Library
+	game: dynlib.Library,
+	game_ui: proc(),
 }
 
 g_program : u32
@@ -189,7 +190,11 @@ app_init :: proc() -> bool
 		ei.key_pressed = key_pressed
 		ei.camera = &g_camera
 		ei.delta_time = &g_app.delta_time
+		ei.screen_print = screen_print
+		ei.screen_tprintf = screen_tprintf
 		game_init(ei)
+
+		g_app.game_ui = cast(proc())dynlib.symbol_address(g_app.game, "game_ui")
 	}
 
 	//world_create()
@@ -361,8 +366,7 @@ app_render :: proc()
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, g_app.screen_ebo)
 	gl.DrawElements(gl.TRIANGLES, i32(len(SCREEN_EBO)), gl.UNSIGNED_SHORT, nil)
 
-
-	game_UI();
+	g_app.game_ui()
 	
 	SDL.GL_SwapWindow(g_app.window)
 }
@@ -833,24 +837,6 @@ entity_render :: proc(en: ^shared.Entity, view_matrix: glm.mat4, proj_matrix: gl
 	model := &g_app.models[en.model]
 	model_render(model, transform_matrix, proj_matrix, view_matrix)
 	
-}
-
-//TEMP(Fix): Move to game code
-game_UI :: proc()
-{
-	font_size :f32: 6
-	text_scale :f32: 2
-
-	text := "DreamRealms - SOME ASSETS ARE PLACEHOLDER AND WILL NOT BE IN THE FINAL GAME"
-	x_start : f32 = cast(f32)(1280 / 2) - (cast(f32)len(text) * (text_scale * font_size) / 2)
-	text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{x_start, 2}, 2, text)
-
-	text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, 720 - text_scale * font_size - 2}, 2, "v0.1.0")
-
-	player := &g_app.entities[1]
-	text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, text_scale}, 2, fmt.tprintf("X: %f\nY: %f\nZ: %f", player.position.x, player.position.y, player.position.z))
-	//text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, 0}, 2, fmt.tprintf("FPS: %.f", 1.0/g_app.delta_time))
-	//free_all(context.temp_allocator)
 }
 
 GAMEDIR :: "basegame"
