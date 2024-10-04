@@ -282,6 +282,8 @@ app_shutdown :: proc()
 	delete(g_app.keyboard_state)
 	delete(g_app.last_keyboard_state)
 
+	dynlib.unload_library(g_app.game)
+
 	SDL.GL_DeleteContext(g_app.gl_context)
 	SDL.DestroyWindow(g_app.window)
 	SDL.Quit()
