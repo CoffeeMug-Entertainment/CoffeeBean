@@ -208,7 +208,8 @@ main :: proc()
 				{
 					for mesh_vtx, mesh_vtx_idx in mesh.vertices
 					{
-						if linalg.distance(vtx, mesh_vtx) > qmap.EPSILON do continue
+						if linalg.distance(vtx, mesh_vtx) > qmap.EPSILON {continue} //Too far apart
+						if mesh.uvs[mesh_vtx_idx] != poly.uvs[poly_vtx_idx] {continue} //Don't share UVs
 
 						continue poly_vtxes
 					}
@@ -221,10 +222,14 @@ main :: proc()
 				for vtx_idx in poly.indices
 				{
 					poly_vtx := poly.vertices[vtx_idx]
+					poly_uv := poly.uvs[vtx_idx]
 
 					for mesh_vtx, mesh_vtx_idx in mesh.vertices
 					{
-						if linalg.distance(poly_vtx, mesh_vtx) > qmap.EPSILON do continue
+						mesh_uv := mesh.uvs[mesh_vtx_idx]
+						if linalg.distance(poly_vtx, mesh_vtx) > qmap.EPSILON {continue} //Too far apart
+						if mesh_uv != poly_uv {continue} //Not the same UV
+						
 						
 						append(&submesh.indices, u16(mesh_vtx_idx))
 						break
