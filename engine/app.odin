@@ -561,9 +561,17 @@ load_model_m3d :: proc(path: string) -> bool
 		{
 			smesh := &mesh.submeshes[i]
 
+			//zzz
+			//TEMP(Fix): This is here for compatibility with old .map formats
+			if !strings.contains(smesh.material, "/")
+			{
+				temp_path := fmt.tprintf("./%v/textures/%v.tga", GAMEDIR, smesh.material)
+				smesh.material = strings.clone(temp_path)
+				
+			}
+
 			load_texture(smesh.material)
 			push_image_to_GPU(smesh.material)
-
 
 			gl.GenBuffers(1, &smesh.ebo)
 			gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, smesh.ebo)
