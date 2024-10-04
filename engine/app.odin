@@ -776,6 +776,14 @@ text_print :: proc(font_name: string, position: glm.vec2, scale: f32, text: stri
 	}
 }
 
+screen_tprintf :: proc(font_name: string, position: glm.vec2, scale: f32, format: string, args : ..any)
+{
+	strb: strings.Builder
+	strings.builder_init(&strb, context.temp_allocator)
+	fmt.sbprintf(&strb, format, ..args)
+	screen_print(font_name, position, scale, strings.to_string(strb))
+}
+
 g_camera: shared.Camera
 
 camera_move :: proc(dir: glm.vec3)
