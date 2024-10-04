@@ -305,7 +305,7 @@ app_update :: proc()
 app_render :: proc()
 {
 	view := glm.mat4LookAt(g_camera.position, g_camera.position + g_camera.forward, g_camera.up)
-	proj := glm.mat4Perspective(1, 16.0/9.0, 0.05, 2048.0)
+	proj := glm.mat4Perspective(1, 16.0/9.0, 0.05, 4096.0)
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, g_app.screen_framebuffer)
 	gl.Enable(gl.DEPTH_TEST)
