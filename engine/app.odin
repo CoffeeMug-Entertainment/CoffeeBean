@@ -66,6 +66,11 @@ key_pressed :: proc(sc: SDL.Scancode) -> bool
 	return g_app.keyboard_state[sc] > 0 && g_app.last_keyboard_state[sc] == 0
 }
 
+key_released :: proc(sc: SDL.Scancode) -> bool
+{
+	return g_app.keyboard_state[sc] == 0 && g_app.last_keyboard_state[sc] > 0
+}
+
 app_init :: proc() -> bool
 {
 	// SDL
