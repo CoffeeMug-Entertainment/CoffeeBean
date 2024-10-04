@@ -178,7 +178,15 @@ app_init :: proc() -> bool
 	}
 
 	//Gamecode
-	GAMECODE_PATH :: "basegame/game.so"
+	
+	when ODIN_OS == .Linux
+	{
+		GAMECODE_PATH :: "basegame/game.so"
+	}
+	else
+	{
+		GAMECODE_PATH :: "basegame/game.dll"
+	}
 	gamecode_loaded: bool
 	g_app.game, gamecode_loaded = dynlib.load_library(GAMECODE_PATH)
 	if !gamecode_loaded {log.errorf("Failed to load gamecode: %v\n", GAMECODE_PATH)}
