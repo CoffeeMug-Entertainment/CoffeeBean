@@ -49,9 +49,9 @@ Brush :: struct
 Face :: struct
 {
 	//Parsed from file
+	p0: vec3,
 	p1: vec3,
 	p2: vec3,
-	p3: vec3,
 	material: string,
 	x_offset: f32,
 	y_offset: f32,
@@ -386,17 +386,17 @@ process_face :: proc(slice: []Token) -> Face
 	face: Face
 
 	ok: bool
-	face.p1.x, ok = strconv.parse_f32(slice[1].value)
-	face.p1.y, ok = strconv.parse_f32(slice[2].value)
-	face.p1.z, ok = strconv.parse_f32(slice[3].value)
+	face.p0.x, ok = strconv.parse_f32(slice[1].value)
+	face.p0.y, ok = strconv.parse_f32(slice[2].value)
+	face.p0.z, ok = strconv.parse_f32(slice[3].value)
 
-	face.p2.x, ok = strconv.parse_f32(slice[6].value)
-	face.p2.y, ok = strconv.parse_f32(slice[7].value)
-	face.p2.z, ok = strconv.parse_f32(slice[8].value)
+	face.p1.x, ok = strconv.parse_f32(slice[6].value)
+	face.p1.y, ok = strconv.parse_f32(slice[7].value)
+	face.p1.z, ok = strconv.parse_f32(slice[8].value)
 
-	face.p3.x, ok = strconv.parse_f32(slice[11].value)
-	face.p3.y, ok = strconv.parse_f32(slice[12].value)
-	face.p3.z, ok = strconv.parse_f32(slice[13].value)
+	face.p2.x, ok = strconv.parse_f32(slice[11].value)
+	face.p2.y, ok = strconv.parse_f32(slice[12].value)
+	face.p2.z, ok = strconv.parse_f32(slice[13].value)
 
 	face.material = slice[15].value
 
@@ -407,10 +407,10 @@ process_face :: proc(slice: []Token) -> Face
 	face.y_scale, ok = strconv.parse_f32(slice[20].value)
 
 	//Calculate unstored data
-	face.normal = linalg.cross(face.p3 - face.p1, face.p2 - face.p1)
+	face.normal = linalg.cross(face.p2 - face.p1, face.p1 - face.p0)
 	face.normal = linalg.normalize(face.normal)
 
-	face.distance = -linalg.dot(face.normal, face.p1)	
+	face.distance = -linalg.dot(face.normal, face.p0)	
 
 	return face
 }
