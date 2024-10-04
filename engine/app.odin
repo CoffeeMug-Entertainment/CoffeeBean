@@ -864,7 +864,7 @@ import "core:fmt"
 
 player_update :: proc(player: ^Entity)
 {
-	SPEED :: 30.0
+	SPEED :: 320.0
 	move_dir: glm.vec3
 
 	delta_speed := SPEED * g_app.delta_time
