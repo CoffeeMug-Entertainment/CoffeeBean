@@ -834,7 +834,10 @@ entity_render :: proc(en: ^Entity, view_matrix: glm.mat4, proj_matrix: glm.mat4)
 	
 }
 
-WORLD_MODEL :: "./basegame/models/map.m3d"
+
+// TODO(Fix): Put in gamecode
+WORLD_MODEL :: "./basegame/maps/test.m3d"
+//WORLD_MODEL :: "./basegame/models/map.m3d"
 
 world_create :: proc()
 {
@@ -844,7 +847,8 @@ world_create :: proc()
 	world.model = WORLD_MODEL
 	world.name = "World"
 	world.flags |= {.RENDERABLE}
-	if world.model == "./basegame/models/map.m3d" do world.rotation.x = 90 //TEMP hackery, lol
+	if strings.contains(WORLD_MODEL, ".m3d") do world.rotation.x = -90 //TEMP hackery, lol
+	//world.rotation.x = -90
 }
 
 player_create :: proc()
