@@ -725,7 +725,7 @@ load_font_image :: proc(path: string) -> bool
 	return true
 }
 
-text_print :: proc(font_name: string, position: glm.vec2, scale: f32, text: string)
+screen_print :: proc(font_name: string, position: glm.vec2, scale: f32, text: string)
 {
 	gl.UseProgram(g_text_program)
 	gl.BindVertexArray(quad_vao)
