@@ -193,6 +193,7 @@ app_init :: proc() -> bool
 		ei.load_model_m3d = load_model_m3d
 		ei.key_down = key_down
 		ei.key_pressed = key_pressed
+		ei.key_released = key_released
 		ei.camera = &g_camera
 		ei.delta_time = &g_app.delta_time
 		ei.screen_print = screen_print

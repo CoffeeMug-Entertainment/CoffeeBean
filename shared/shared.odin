@@ -32,6 +32,7 @@ EngineInterface :: struct
 	load_model_m3d : proc(path: string) -> bool,
 	key_down : proc(sc: SDL.Scancode) -> bool,
 	key_pressed : proc(sc: SDL.Scancode) -> bool,
+	key_released : proc(sc: SDL.Scancode) -> bool,
 
 	delta_time : ^f32,
 	camera: ^Camera,
