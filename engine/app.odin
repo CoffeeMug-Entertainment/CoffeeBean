@@ -335,21 +335,7 @@ app_render :: proc()
 	gl.DrawElements(gl.TRIANGLES, i32(len(SCREEN_EBO)), gl.UNSIGNED_SHORT, nil)
 
 
-	//TODO: Move to game code
-	{
-		font_size :f32: 6
-		text_scale :f32: 2
-
-		text := "DreamRealms - SOME ASSETS ARE PLACEHOLDER AND WILL NOT BE IN THE FINAL GAME"
-		x_start : f32 = cast(f32)(1280 / 2) - (cast(f32)len(text) * (text_scale * font_size) / 2)
-		text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{x_start, 2}, 2, text)
-
-		text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, 720 - text_scale * font_size - 2}, 2, "v0.1.0")
-
-		player := &g_app.entities[1]
-		text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, text_scale}, 2, fmt.tprintf("%v\n%v\n%v", player.position.x, player.position.y, player.position.z))
-		free_all(context.temp_allocator)
-	}
+	game_UI();
 	
 	SDL.GL_SwapWindow(g_app.window)
 }
@@ -907,3 +893,23 @@ player_update :: proc(player: ^Entity)
 	g_camera.position = player.position
 	//g_camera.rotation = player.rotation
 }
+
+//TEMP(Fix): Move to game code
+game_UI :: proc()
+{
+	font_size :f32: 6
+	text_scale :f32: 2
+
+	text := "DreamRealms - SOME ASSETS ARE PLACEHOLDER AND WILL NOT BE IN THE FINAL GAME"
+	x_start : f32 = cast(f32)(1280 / 2) - (cast(f32)len(text) * (text_scale * font_size) / 2)
+	text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{x_start, 2}, 2, text)
+
+	text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, 720 - text_scale * font_size - 2}, 2, "v0.1.0")
+
+	player := &g_app.entities[1]
+	text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, text_scale}, 2, fmt.tprintf("X: %f\nY: %f\nZ: %f", player.position.x, player.position.y, player.position.z))
+	//text_print("./basegame/fonts/FontCodeMonospace.png", glm.vec2{0, 0}, 2, fmt.tprintf("FPS: %.f", 1.0/g_app.delta_time))
+	//free_all(context.temp_allocator)
+}
+
+GAMEDIR :: "basegame"
